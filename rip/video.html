@@ -51,7 +51,7 @@
         <a data-share="whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp</a>
         <a data-share="telegram" target="_blank" rel="noopener noreferrer">Telegram</a>
         <a data-share="x" target="_blank" rel="noopener noreferrer">X</a>
-        <button type="button" id="copy-link">Kopírovat odkaz</button>
+        <button type="button" id="copy-link">Discord – zkopírovat odkaz</button>
       </div>
     </details>
   </div>
@@ -59,9 +59,8 @@
 </main>
 <script>
 (function(){
-  var pageUrl = new URL(window.location.href);
-  pageUrl.hash = '';
-  var encodedUrl = encodeURIComponent(pageUrl.href);
+  var videoUrl = 'https://gecka2026.github.io/lib/lv1qDLbRhp8QfCrD.mp4';
+  var encodedUrl = encodeURIComponent(videoUrl);
   var encodedTitle = encodeURIComponent(document.title);
   var shareUrls = {
     facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl,
@@ -76,23 +75,13 @@
   var share = document.querySelector('.share');
   var copyButton = document.getElementById('copy-link');
   var status = document.getElementById('share-status');
-  if (pageUrl.protocol !== 'https:' && pageUrl.protocol !== 'http:'){
-    document.querySelectorAll('[data-share]').forEach(function(link){
-      link.removeAttribute('href');
-      link.setAttribute('aria-disabled', 'true');
-    });
-    copyButton.disabled = true;
-    status.textContent = 'Sdílení bude dostupné po zveřejnění stránky na webu.';
-    return;
-  }
-
   copyButton.addEventListener('click', function(){
     if (!navigator.clipboard || !navigator.clipboard.writeText){
       status.textContent = 'Kopírování odkazu není v tomto prohlížeči dostupné.';
       return;
     }
-    navigator.clipboard.writeText(pageUrl.href).then(function(){
-      status.textContent = 'Odkaz zkopírován.';
+    navigator.clipboard.writeText(videoUrl).then(function(){
+      status.textContent = 'Přímý odkaz na video zkopírován.';
       share.open = false;
     }).catch(function(){
       status.textContent = 'Odkaz se nepodařilo zkopírovat.';
