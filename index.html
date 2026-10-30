@@ -75,11 +75,8 @@
   });
 
   var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced){
-    document.documentElement.classList.add('reduced');
-    if (IS_GO) setTimeout(go, 1500);
-    return;
-  }
+  if (reduced) document.documentElement.classList.add('reduced');
+  if (reduced && !IS_GO) return;
 
   var cv = document.getElementById('c');
   var foot = document.getElementById('foot');
