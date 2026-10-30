@@ -5,24 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Když nasazení nestačí — video vzpomínka.">
 <link rel="canonical" href="https://gecka2026.github.io/rip/video.html">
+<meta name="theme-color" content="#15171B">
 <meta property="og:type" content="video.other">
 <meta property="og:site_name" content="Na rozloučenou">
 <meta property="og:title" content="Když nasazení nestačí">
 <meta property="og:description" content="Když nasazení nestačí — video vzpomínka.">
 <meta property="og:url" content="https://gecka2026.github.io/rip/video.html">
 <meta property="og:locale" content="cs_CZ">
-<meta property="og:image" content="https://gecka2026.github.io/rip/vzpominka.png">
-<meta property="og:image:secure_url" content="https://gecka2026.github.io/rip/vzpominka.png">
-<meta property="og:image:type" content="image/png">
+<meta property="og:image" content="https://gecka2026.github.io/rip/vzpominka-share.jpg">
+<meta property="og:image:secure_url" content="https://gecka2026.github.io/rip/vzpominka-share.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Zprávy na rozloučenou">
 <meta property="og:video" content="https://gecka2026.github.io/lib/lv1qDLbRhp8QfCrD.mp4">
 <meta property="og:video:url" content="https://gecka2026.github.io/lib/lv1qDLbRhp8QfCrD.mp4">
 <meta property="og:video:secure_url" content="https://gecka2026.github.io/lib/lv1qDLbRhp8QfCrD.mp4">
 <meta property="og:video:type" content="video/mp4">
+<meta property="og:video:width" content="848">
+<meta property="og:video:height" content="432">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Když nasazení nestačí">
 <meta name="twitter:description" content="Když nasazení nestačí — video vzpomínka.">
-<meta name="twitter:image" content="https://gecka2026.github.io/rip/vzpominka.png">
+<meta name="twitter:image" content="https://gecka2026.github.io/rip/vzpominka-share.jpg">
 <meta name="twitter:image:alt" content="Zprávy na rozloučenou">
 <title>Když nasazení nestačí</title>
 <style>
@@ -53,6 +58,11 @@
   .share-menu a,.share-menu button{display:block;width:100%;padding:.4rem .55rem;border:0;background:none;color:var(--dim);font:inherit;font-size:.95rem;text-align:left;text-decoration:none;white-space:nowrap;cursor:pointer}
   .share-menu a:hover,.share-menu button:hover,.share-menu a:focus-visible,.share-menu button:focus-visible{color:var(--ink);background:#252930}
   .share-menu a[aria-disabled="true"],.share-menu button:disabled{opacity:.45;cursor:not-allowed}
+  .egg-pop{max-width:20rem;padding:1.2rem 1.4rem;background:#1c1f24;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 8px 24px rgba(0,0,0,.4);font-family:var(--serif);text-align:center}
+  .egg-pop::backdrop{background:rgba(0,0,0,.55)}
+  .egg-pop p{margin:0 0 1rem}
+  .egg-pop a,.egg-pop button{display:inline-block;margin:0 .3rem;padding:.35rem .8rem;border:1px solid #2B2F37;background:none;color:var(--ink);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer}
+  .egg-pop a:hover,.egg-pop button:hover{background:#252930}
   .share-status{margin:.5rem 0 0;color:var(--dim);font-size:.9rem;text-align:right}
 </style>
 </head>
@@ -81,10 +91,15 @@
   </div>
   <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
   <a class="easter-egg" href="https://gecka2026.github.io/lib/lv1qD3LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer" title="Tajný kaštanový východ — pro případ, že nasazení nestačí">L. K.?</a>
+  <dialog class="egg-pop" id="egg-pop" aria-label="L. K.?">
+    <p>L. K.?</p>
+    <a id="egg-go" href="https://gecka2026.github.io/lib/lv1qD3LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer">pustit</a>
+    <button type="button" id="egg-close">zavřít</button>
+  </dialog>
 </main>
 <script>
 (function(){
-  var videoUrl = 'https://gecka2026.github.io/lib/lv1qDLbRhp8QfCrD.mp4';
+  var videoUrl = 'https://gecka2026.github.io/rip/video.html';
   var encodedUrl = encodeURIComponent(videoUrl);
   var encodedTitle = encodeURIComponent(document.title);
   var shareUrls = {
@@ -106,11 +121,37 @@
       return;
     }
     navigator.clipboard.writeText(videoUrl).then(function(){
-      status.textContent = 'Přímý odkaz na video zkopírován.';
+      status.textContent = 'Odkaz na video zkopírován.';
       share.open = false;
     }).catch(function(){
       status.textContent = 'Odkaz se nepodařilo zkopírovat.';
     });
+  });
+})();
+(function(){
+  var pop = document.getElementById('egg-pop');
+  var video = document.querySelector('.video');
+  if (!pop || !pop.showModal) return;
+  function show(){ if (!pop.open) pop.showModal(); }
+  document.getElementById('egg-close').addEventListener('click', function(){ pop.close(); });
+  document.getElementById('egg-go').addEventListener('click', function(){ pop.close(); });
+  pop.addEventListener('click', function(e){ if (e.target === pop) pop.close(); });
+  // 1) po dohrání videa
+  if (video) video.addEventListener('ended', show);
+  // 2) napsání „lk“ na klávesnici
+  var last = '';
+  document.addEventListener('keydown', function(e){
+    var k = (e.key || '').toLowerCase();
+    last = (last + k).slice(-2);
+    if (last === 'lk') show();
+  });
+  // 3) 3× rychlé ťuknutí na video (mobil)
+  var taps = [];
+  if (video) video.addEventListener('pointerup', function(){
+    var t = Date.now();
+    taps = taps.filter(function(x){ return t - x < 800; });
+    taps.push(t);
+    if (taps.length >= 3){ taps = []; show(); }
   });
 })();
 </script>
