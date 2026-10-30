@@ -65,14 +65,15 @@
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
   body{overflow:hidden}
+  html:not(.go):not(.intro) body{overflow:auto}
   canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;z-index:0}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
   /* stav 1: ukázka QR kódu */
   .qrbox{position:relative;z-index:1;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem}
   .qrbox h2{font-weight:400;font-style:italic;font-size:clamp(1.8rem,7vw,2.6rem);margin:0 0 1.6rem}
-  .plate{background:transparent;padding:14px;width:min(74vw,320px);aspect-ratio:1;display:flex;align-items:center;justify-content:center;box-shadow:none}
-  .plate img{width:100%;height:100%;display:block;image-rendering:pixelated}
+  .plate{background:transparent;padding:0;width:max(120px,min(74vw,320px,calc((100vh - 12rem) * .8696)));width:max(120px,min(74vw,320px,calc((100svh - 12rem) * .8696)));aspect-ratio:720/828;display:flex;align-items:center;justify-content:center;box-shadow:none}
+  .plate img{width:100%;height:100%;display:block;object-fit:contain}
   .plate .miss{color:#3a3f4a;font-style:italic;font-size:1rem;padding:1rem}
   .cap{margin:1.4rem 0 0;color:var(--dim);font-size:1rem}
   .cap a{color:var(--dim);text-underline-offset:.2em;text-decoration-color:var(--line)}
