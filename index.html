@@ -10,14 +10,14 @@
 <meta property="og:title" content="Na rozloučenou">
 <meta property="og:description" content="Naskenujte QR kód a otevřete odkaz z telefonu.">
 <meta property="og:url" content="https://gecka2026.github.io/rip?qr">
-<meta property="og:image" content="https://gecka2026.github.io/rip/lib/qr.png">
+<meta property="og:image" content="https://gecka2026.github.io/rip/lib/QR.png">
 <meta property="og:image:alt" content="QR kód pro otevření odkazu">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="1200">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Na rozloučenou">
 <meta name="twitter:description" content="Naskenujte QR kód a otevřete odkaz z telefonu.">
-<meta name="twitter:image" content="https://gecka2026.github.io/rip/lib/qr.png">
+<meta name="twitter:image" content="https://gecka2026.github.io/rip/lib/QR.png">
 <meta name="twitter:image:alt" content="QR kód pro otevření odkazu">
 <title>Na rozloučenou</title>
 <script>
@@ -70,7 +70,7 @@
 
   <main class="qrbox">
     <h2>Na rozloučenou</h2>
-    <div class="plate" id="plate"><img id="qr" src="lib/qr.png" alt="QR kód, naskenujte ho telefonem"></div>
+    <div class="plate" id="plate"><img id="qr" src="lib/QR.png" alt="QR kód, naskenujte ho telefonem"></div>
     <p class="cap">Naskenujte kód telefonem. <a id="direct" href="#">Otevřít přímo</a></p>
   </main>
 
@@ -88,7 +88,7 @@
   // chybějící obrázek
   var qr = document.getElementById('qr');
   qr.addEventListener('error', function(){
-    document.getElementById('plate').innerHTML = '<span class="miss">Sem přijde QR kód (soubor qr.png)</span>';
+    document.getElementById('plate').innerHTML = '<span class="miss">QR kód se nepodařilo načíst (lib/QR.png)</span>';
   });
 
   var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
