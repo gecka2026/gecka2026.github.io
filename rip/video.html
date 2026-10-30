@@ -137,16 +137,14 @@
   document.getElementById('egg-close').addEventListener('click', function(){ pop.close(); });
   document.getElementById('egg-go').addEventListener('click', function(){ pop.close(); });
   pop.addEventListener('click', function(e){ if (e.target === pop) pop.close(); });
-  // 1) po dohrání videa
-  if (video) video.addEventListener('ended', show);
-  // 2) napsání „lk“ na klávesnici
+  // Napsání „lk“ na klávesnici.
   var last = '';
   document.addEventListener('keydown', function(e){
     var k = (e.key || '').toLowerCase();
     last = (last + k).slice(-2);
     if (last === 'lk') show();
   });
-  // 2b) utíkající „L. K.?“ – uteče 2–3×, až pak doopravdy otevře video
+  // Utíkající „L. K.?“ – uteče 2–3×, až pak doopravdy otevře video.
   var egg = document.querySelector('.easter-egg');
   if (egg){
     var need = 3 + Math.floor(Math.random() * 2); // 3. nebo 4. klik otevře video
@@ -172,7 +170,7 @@
       egg.style.left = x + 'px'; egg.style.top = y + 'px';
     });
   }
-  // 3) 3× rychlé ťuknutí na video (mobil)
+  // 3× rychlé ťuknutí na video (mobil).
   var taps = [];
   if (video) video.addEventListener('pointerup', function(){
     var t = Date.now();
