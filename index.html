@@ -4,6 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#15171B">
+<meta name="description" content="Naskenujte QR kód a otevřete odkaz z telefonu.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Na rozloučenou">
+<meta property="og:title" content="Na rozloučenou">
+<meta property="og:description" content="Naskenujte QR kód a otevřete odkaz z telefonu.">
+<meta property="og:url" content="https://gecka2026.github.io/rip?qr">
+<meta property="og:image" content="https://gecka2026.github.io/rip/lib/qr.png">
+<meta property="og:image:alt" content="QR kód pro otevření odkazu">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Na rozloučenou">
+<meta name="twitter:description" content="Naskenujte QR kód a otevřete odkaz z telefonu.">
+<meta name="twitter:image" content="https://gecka2026.github.io/rip/lib/qr.png">
+<meta name="twitter:image:alt" content="QR kód pro otevření odkazu">
 <title>Na rozloučenou</title>
 <script>
   var TARGET = "https://gecka2026.github.io/rip?qr";
@@ -11,6 +26,7 @@
   var GO_AT = 5900;        // kdy se přejde na cíl
   var IS_GO = /[?&]qr(=|&|$)/.test(location.search) || location.hash === '#qr';
   if (IS_GO) document.documentElement.classList.add('go');
+  else document.documentElement.classList.add('intro');
 </script>
 <style>
   :root{--bg:#15171B;--ink:#B9BEC7;--dim:#6E7480;--line:#2B2F37;--plate:#E6E8EC}
@@ -42,6 +58,7 @@
   .still h2{font-weight:400;font-style:italic;font-size:clamp(2rem,9vw,3.2rem);margin:0}
 
   .go .qrbox{display:none}
+  .intro .qrbox{display:none}
   html:not(.go) .foot{display:none}
   .reduced canvas{display:none}
   .go.reduced .still{display:flex}
@@ -76,13 +93,20 @@
 
   var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced) document.documentElement.classList.add('reduced');
-  if (reduced && !IS_GO) return;
+  if (reduced && !IS_GO){
+    document.documentElement.classList.remove('intro');
+    return;
+  }
 
   var cv = document.getElementById('c');
   var foot = document.getElementById('foot');
   var ctx;
   try { ctx = cv.getContext('2d'); } catch(e){}
-  if (!ctx){ if (IS_GO) setTimeout(go, 1500); return; }
+  if (!ctx){
+    if (IS_GO) setTimeout(go, 1500);
+    else document.documentElement.classList.remove('intro');
+    return;
+  }
 
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
   var W = 0, H = 0;
@@ -94,153 +118,138 @@
     ctx.fillRect(0, 0, W, H);
   }
 
-  /* ---------- stav 1: pomalu padající popel za QR kódem ---------- */
-  if (!IS_GO){
-    var ash = [];
-    function seed(){
-      size();
-      ash = [];
-      var n = Math.min(160, Math.round(innerWidth * innerHeight / 9000));
-      for (var i = 0; i < n; i++){
-        ash.push({x: rnd(0, W), y: rnd(0, H), v: rnd(.15, .5) * dpr, ph: rnd(0, 6.28),
-                  s: rnd(.8, 2) * dpr, a: rnd(.15, .5)});
-      }
+  function initScanState(showQrAfter){
+    if (showQrAfter) document.documentElement.classList.add('intro');
+    else {
+      document.documentElement.classList.add('go');
+      setTimeout(go, GO_AT + 400);
     }
-    seed();
-    var rs;
-    addEventListener('resize', function(){ clearTimeout(rs); rs = setTimeout(seed, 150); });
-    (function loop(now){
+
+    var particles = [], ptr = {x:0, y:0, on:false, burst:0};
+    var dissolving = false, t0 = 0, last = 0;
+
+    function sampleText(){
+      var off = document.createElement('canvas');
+      off.width = W; off.height = H;
+      var o = off.getContext('2d');
+      var lines = W / dpr < 600 ? ['Na', 'rozloučenou'] : ['Na rozloučenou'];
+      var fs = 100;
+      function setFont(){ o.font = 'italic ' + fs + 'px Georgia, "Times New Roman", serif'; }
+      setFont();
+      var widest = 0;
+      lines.forEach(function(s){ widest = Math.max(widest, o.measureText(s).width); });
+      fs = Math.min(fs * (W * 0.84) / widest, H * 0.22);
+      setFont();
+      o.fillStyle = '#fff'; o.textAlign = 'center'; o.textBaseline = 'middle';
+      var lh = fs * 1.15, y0 = H * 0.47 - (lines.length - 1) * lh / 2;
+      lines.forEach(function(s, k){ o.fillText(s, W / 2, y0 + k * lh); });
+      var data = o.getImageData(0, 0, W, H).data;
+      var gap = Math.max(3, Math.round(fs / 26)), pts;
+      for (;;){
+        pts = [];
+        for (var y = 0; y < H; y += gap)
+          for (var x = 0; x < W; x += gap)
+            if (data[(y * W + x) * 4 + 3] > 128) pts.push([x + rnd(-.6, .6), y + rnd(-.6, .6)]);
+        if (pts.length <= 4500) break;
+        gap++;
+      }
+      return pts;
+    }
+
+    function newParticle(){
+      return {x: rnd(0, W), y: rnd(-H * .4, H * 1.05), vx: 0, vy: 0, tx: 0, ty: 0, k: rnd(.6, 1.4),
+              s: rnd(.8, 2) * dpr, a: rnd(.55, 1), c: 'hsl(215,12%,' + Math.round(rnd(58, 84)) + '%)',
+              life: 1, decay: rnd(.45, .9), rise: rnd(.02, .09)};
+    }
+
+    function build(){
+      size();
+      var pts = sampleText();
+      while (particles.length < pts.length) particles.push(newParticle());
+      particles.length = pts.length;
+      pts.forEach(function(p, i){ particles[i].tx = p[0]; particles[i].ty = p[1]; });
+    }
+
+    function frame(now){
+      if (!t0){ t0 = now; last = now; }
+      var t = now - t0;
+      var s = Math.min(2.5, (now - last) / 16.7), dt = (now - last) / 1000;
+      last = now;
+      if (!dissolving && t > DISSOLVE_AT){ dissolving = true; foot.classList.remove('on'); foot.classList.add('off'); }
+
       ctx.globalAlpha = 1;
-      ctx.fillStyle = 'rgba(21,23,27,.3)';
+      ctx.fillStyle = 'rgba(21,23,27,' + (dissolving ? .12 : .32) + ')';
       ctx.fillRect(0, 0, W, H);
-      for (var i = 0; i < ash.length; i++){
-        var p = ash[i];
-        p.y += p.v;
-        p.x += Math.sin(now * 0.0004 + p.ph) * 0.35 * dpr;
-        if (p.y > H + 4){ p.y = -4; p.x = rnd(0, W); }
-        ctx.globalAlpha = p.a;
-        ctx.fillStyle = '#B9BEC7';
+
+      var fadeIn = Math.min(1, t / 1200);
+      var R = Math.max(70, Math.min(150, Math.min(W, H) * .14 / dpr)) * dpr;
+      var damp = Math.pow(.9, s);
+      var burst = ptr.burst > 0 ? 3 : 1;
+      if (ptr.burst > 0) ptr.burst -= s;
+
+      for (var i = 0; i < particles.length; i++){
+        var p = particles[i];
+        if (!dissolving){
+          p.vx += (p.tx - p.x) * .012 * p.k * s;
+          p.vy += (p.ty - p.y) * .012 * p.k * s;
+          if (ptr.on){
+            var dx = p.x - ptr.x, dy = p.y - ptr.y, d2 = dx * dx + dy * dy;
+            if (d2 < R * R && d2 > 1){
+              var d = Math.sqrt(d2), f = (1 - d / R) * 3.2 * burst * s;
+              p.vx += dx / d * f; p.vy += dy / d * f;
+            }
+          }
+          p.vx *= damp; p.vy *= damp;
+        } else {
+          p.vx += (.03 + rnd(-.04, .04)) * s;
+          p.vy -= p.rise * s;
+          p.vx *= Math.pow(.985, s); p.vy *= Math.pow(.985, s);
+          p.life -= dt * p.decay;
+        }
+        p.x += p.vx * s; p.y += p.vy * s;
+        var al = p.a * fadeIn * (dissolving ? Math.max(0, p.life) : 1);
+        if (al <= .01) continue;
+        ctx.globalAlpha = al;
+        ctx.fillStyle = p.c;
         ctx.fillRect(p.x, p.y, p.s, p.s);
       }
-      requestAnimationFrame(loop);
-    })(0);
-    return;
-  }
-
-  /* ---------- stav 2: naskenováno, popel složí nápis a rozpustí se ---------- */
-  setTimeout(go, GO_AT + 400);   // záloha: přechod proběhne vždy
-
-  var particles = [], ptr = {x:0, y:0, on:false, burst:0};
-  var dissolving = false, t0 = 0, last = 0;
-
-  function sampleText(){
-    var off = document.createElement('canvas');
-    off.width = W; off.height = H;
-    var o = off.getContext('2d');
-    var lines = W / dpr < 600 ? ['Na', 'rozloučenou'] : ['Na rozloučenou'];
-    var fs = 100;
-    function setFont(){ o.font = 'italic ' + fs + 'px Georgia, "Times New Roman", serif'; }
-    setFont();
-    var widest = 0;
-    lines.forEach(function(s){ widest = Math.max(widest, o.measureText(s).width); });
-    fs = Math.min(fs * (W * 0.84) / widest, H * 0.22);
-    setFont();
-    o.fillStyle = '#fff'; o.textAlign = 'center'; o.textBaseline = 'middle';
-    var lh = fs * 1.15, y0 = H * 0.47 - (lines.length - 1) * lh / 2;
-    lines.forEach(function(s, k){ o.fillText(s, W / 2, y0 + k * lh); });
-    var data = o.getImageData(0, 0, W, H).data;
-    var gap = Math.max(3, Math.round(fs / 26)), pts;
-    for (;;){
-      pts = [];
-      for (var y = 0; y < H; y += gap)
-        for (var x = 0; x < W; x += gap)
-          if (data[(y * W + x) * 4 + 3] > 128) pts.push([x + rnd(-.6, .6), y + rnd(-.6, .6)]);
-      if (pts.length <= 4500) break;
-      gap++;
-    }
-    return pts;
-  }
-
-  function newParticle(){
-    return {x: rnd(0, W), y: rnd(-H * .4, H * 1.05), vx: 0, vy: 0, tx: 0, ty: 0, k: rnd(.6, 1.4),
-            s: rnd(.8, 2) * dpr, a: rnd(.55, 1), c: 'hsl(215,12%,' + Math.round(rnd(58, 84)) + '%)',
-            life: 1, decay: rnd(.45, .9), rise: rnd(.02, .09)};
-  }
-
-  function build(){
-    size();
-    var pts = sampleText();
-    while (particles.length < pts.length) particles.push(newParticle());
-    particles.length = pts.length;
-    pts.forEach(function(p, i){ particles[i].tx = p[0]; particles[i].ty = p[1]; });
-  }
-
-  function frame(now){
-    if (!t0){ t0 = now; last = now; }
-    var t = now - t0;
-    var s = Math.min(2.5, (now - last) / 16.7), dt = (now - last) / 1000;
-    last = now;
-    if (!dissolving && t > DISSOLVE_AT){ dissolving = true; foot.classList.remove('on'); foot.classList.add('off'); }
-
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(21,23,27,' + (dissolving ? .12 : .32) + ')';
-    ctx.fillRect(0, 0, W, H);
-
-    var fadeIn = Math.min(1, t / 1200);
-    var R = Math.max(70, Math.min(150, Math.min(W, H) * .14 / dpr)) * dpr;
-    var damp = Math.pow(.9, s);
-    var burst = ptr.burst > 0 ? 3 : 1;
-    if (ptr.burst > 0) ptr.burst -= s;
-
-    for (var i = 0; i < particles.length; i++){
-      var p = particles[i];
-      if (!dissolving){
-        p.vx += (p.tx - p.x) * .012 * p.k * s;
-        p.vy += (p.ty - p.y) * .012 * p.k * s;
-        if (ptr.on){
-          var dx = p.x - ptr.x, dy = p.y - ptr.y, d2 = dx * dx + dy * dy;
-          if (d2 < R * R && d2 > 1){
-            var d = Math.sqrt(d2), f = (1 - d / R) * 3.2 * burst * s;
-            p.vx += dx / d * f; p.vy += dy / d * f;
-          }
-        }
-        p.vx *= damp; p.vy *= damp;
-      } else {
-        p.vx += (.03 + rnd(-.04, .04)) * s;
-        p.vy -= p.rise * s;
-        p.vx *= Math.pow(.985, s); p.vy *= Math.pow(.985, s);
-        p.life -= dt * p.decay;
+      ctx.globalAlpha = 1;
+      if (t >= GO_AT){
+        if (showQrAfter){
+          document.documentElement.classList.remove('intro');
+          cv.style.display = 'none';
+        } else go();
+        return;
       }
-      p.x += p.vx * s; p.y += p.vy * s;
-      var al = p.a * fadeIn * (dissolving ? Math.max(0, p.life) : 1);
-      if (al <= .01) continue;
-      ctx.globalAlpha = al;
-      ctx.fillStyle = p.c;
-      ctx.fillRect(p.x, p.y, p.s, p.s);
+      requestAnimationFrame(frame);
     }
-    ctx.globalAlpha = 1;
-    if (t >= GO_AT){ go(); return; }
+
+    function setPtr(e, on){
+      var r = cv.getBoundingClientRect();
+      ptr.x = (e.clientX - r.left) * dpr; ptr.y = (e.clientY - r.top) * dpr; ptr.on = on;
+    }
+    cv.addEventListener('pointermove', function(e){ setPtr(e, true); });
+    cv.addEventListener('pointerdown', function(e){ setPtr(e, true); ptr.burst = 14; });
+    cv.addEventListener('pointerup', function(e){ if (e.pointerType !== 'mouse') ptr.on = false; });
+    cv.addEventListener('pointercancel', function(){ ptr.on = false; });
+    cv.addEventListener('pointerleave', function(){ ptr.on = false; });
+    var rt;
+    addEventListener('resize', function(){
+      clearTimeout(rt);
+      rt = setTimeout(function(){ if (!dissolving) build(); }, 150);
+    });
+
+    build();
+    if (!showQrAfter) foot.classList.add('on');
     requestAnimationFrame(frame);
   }
 
-  function setPtr(e, on){
-    var r = cv.getBoundingClientRect();
-    ptr.x = (e.clientX - r.left) * dpr; ptr.y = (e.clientY - r.top) * dpr; ptr.on = on;
+  if (!IS_GO){
+    initScanState(true);
+    return;
   }
-  cv.addEventListener('pointermove', function(e){ setPtr(e, true); });
-  cv.addEventListener('pointerdown', function(e){ setPtr(e, true); ptr.burst = 14; });
-  cv.addEventListener('pointerup', function(e){ if (e.pointerType !== 'mouse') ptr.on = false; });
-  cv.addEventListener('pointercancel', function(){ ptr.on = false; });
-  cv.addEventListener('pointerleave', function(){ ptr.on = false; });
-  var rt;
-  addEventListener('resize', function(){
-    clearTimeout(rt);
-    rt = setTimeout(function(){ if (!dissolving) build(); }, 150);
-  });
 
-  build();
-  foot.classList.add('on');
-  requestAnimationFrame(frame);
+  initScanState(false);
 })();
 </script>
 </body>
