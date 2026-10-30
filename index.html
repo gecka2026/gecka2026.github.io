@@ -6,32 +6,245 @@
 <meta name="theme-color" content="#15171B">
 <title>Na rozloučenou</title>
 <script>
-  var TARGET = "https://gecka2026.github.io/";
-  window.location.replace(TARGET);
+  var TARGET = "https://gecka2026.github.io/rip?qr";
+  var DISSOLVE_AT = 4200;  // kdy se text začne rozpouštět
+  var GO_AT = 5900;        // kdy se přejde na cíl
+  var IS_GO = /[?&]qr(=|&|$)/.test(location.search) || location.hash === '#qr';
+  if (IS_GO) document.documentElement.classList.add('go');
 </script>
-<noscript><meta http-equiv="refresh" content="0; url=hhttps://gecka2026.github.io/rip"></noscript>
 <style>
-  :root{--bg:#15171B;--ink:#B9BEC7;--dim:#6E7480;--line:#2B2F37}
+  :root{--bg:#15171B;--ink:#B9BEC7;--dim:#6E7480;--line:#2B2F37;--plate:#E6E8EC}
   *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif;font-size:1.15rem;line-height:1.7;display:flex;align-items:center;justify-content:center;text-align:center;padding:1.5rem}
-  main{max-width:26rem}
-  h1{font-weight:400;font-style:italic;font-size:clamp(1.8rem,7vw,2.6rem);margin:0 0 1.2rem}
-  p{margin:0 0 .5rem}
-  .dim{color:var(--dim);font-size:1rem}
-  a{color:var(--ink);text-underline-offset:.2em;text-decoration-color:var(--dim)}
-  a:hover{text-decoration-color:var(--ink)}
-  a:focus-visible{outline:2px solid var(--dim);outline-offset:3px}
-  hr{border:0;border-top:1px solid var(--line);margin:1.6rem auto;width:4rem}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+  body{overflow:hidden}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;z-index:0}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* stav 1: ukázka QR kódu */
+  .qrbox{position:relative;z-index:1;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem}
+  .qrbox h2{font-weight:400;font-style:italic;font-size:clamp(1.8rem,7vw,2.6rem);margin:0 0 1.6rem}
+  .plate{background:transparent;padding:14px;width:min(74vw,320px);aspect-ratio:1;display:flex;align-items:center;justify-content:center;box-shadow:none}
+  .plate img{width:100%;height:100%;display:block;image-rendering:pixelated}
+  .plate .miss{color:#3a3f4a;font-style:italic;font-size:1rem;padding:1rem}
+  .cap{margin:1.4rem 0 0;color:var(--dim);font-size:1rem}
+  .cap a{color:var(--dim);text-underline-offset:.2em;text-decoration-color:var(--line)}
+  .cap a:hover{color:var(--ink)}
+  .cap a:focus-visible{outline:2px solid var(--dim);outline-offset:3px}
+
+  /* stav 2: po naskenování */
+  .foot{position:fixed;z-index:1;left:0;right:0;bottom:max(1.6rem,env(safe-area-inset-bottom));text-align:center;font-size:1rem;color:var(--dim);opacity:0;transition:opacity 1.6s 1.4s}
+  .foot.on{opacity:1}
+  .foot.off{opacity:0;transition:opacity 1s}
+  .foot a{color:var(--dim);text-underline-offset:.2em;text-decoration-color:var(--line);padding:.6rem .8rem;display:inline-block}
+  .foot a:hover{color:var(--ink)}
+  .foot a:focus-visible{outline:2px solid var(--dim);outline-offset:2px}
+  .still{display:none;position:fixed;z-index:1;inset:0;align-items:center;justify-content:center;text-align:center;padding:1.5rem}
+  .still h2{font-weight:400;font-style:italic;font-size:clamp(2rem,9vw,3.2rem);margin:0}
+
+  .go .qrbox{display:none}
+  html:not(.go) .foot{display:none}
+  .reduced canvas{display:none}
+  .go.reduced .still{display:flex}
+  .go.reduced .foot{display:none}
 </style>
 </head>
 <body>
-  <main>
-    <h1>Na rozloučenou</h1>
-    <p>Přesměrovávám…</p>
-    <hr>
-    <p class="dim">Pokud se nic nestalo, <a id="l" href="#">klepněte sem</a>.</p>
+  <canvas id="c" aria-hidden="true"></canvas>
+
+  <main class="qrbox">
+    <h2>Na rozloučenou</h2>
+    <div class="plate" id="plate"><img id="qr" src="lib/qr.png" alt="QR kód, naskenujte ho telefonem"></div>
+    <p class="cap">Naskenujte kód telefonem. <a id="direct" href="#">Otevřít přímo</a></p>
   </main>
-  <script>document.getElementById('l').href = TARGET;</script>
+
+  <h1 class="sr">Na rozloučenou</h1>
+  <div class="still" aria-hidden="true"><h2>Na rozloučenou</h2></div>
+  <div class="foot" id="foot">Přesměrovávám… <a id="l" href="#">přejít hned</a></div>
+
+<script>
+(function(){
+  var gone = false;
+  function go(){ if (gone) return; gone = true; window.location.replace(TARGET); }
+  document.getElementById('l').href = TARGET;
+  document.getElementById('direct').href = TARGET;
+
+  // chybějící obrázek
+  var qr = document.getElementById('qr');
+  qr.addEventListener('error', function(){
+    document.getElementById('plate').innerHTML = '<span class="miss">Sem přijde QR kód (soubor qr.png)</span>';
+  });
+
+  var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced){
+    document.documentElement.classList.add('reduced');
+    if (IS_GO) setTimeout(go, 1500);
+    return;
+  }
+
+  var cv = document.getElementById('c');
+  var foot = document.getElementById('foot');
+  var ctx;
+  try { ctx = cv.getContext('2d'); } catch(e){}
+  if (!ctx){ if (IS_GO) setTimeout(go, 1500); return; }
+
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var W = 0, H = 0;
+  function rnd(a, b){ return a + Math.random() * (b - a); }
+  function size(){
+    W = cv.width = Math.round(innerWidth * dpr);
+    H = cv.height = Math.round(innerHeight * dpr);
+    ctx.fillStyle = '#15171B';
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  /* ---------- stav 1: pomalu padající popel za QR kódem ---------- */
+  if (!IS_GO){
+    var ash = [];
+    function seed(){
+      size();
+      ash = [];
+      var n = Math.min(160, Math.round(innerWidth * innerHeight / 9000));
+      for (var i = 0; i < n; i++){
+        ash.push({x: rnd(0, W), y: rnd(0, H), v: rnd(.15, .5) * dpr, ph: rnd(0, 6.28),
+                  s: rnd(.8, 2) * dpr, a: rnd(.15, .5)});
+      }
+    }
+    seed();
+    var rs;
+    addEventListener('resize', function(){ clearTimeout(rs); rs = setTimeout(seed, 150); });
+    (function loop(now){
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = 'rgba(21,23,27,.3)';
+      ctx.fillRect(0, 0, W, H);
+      for (var i = 0; i < ash.length; i++){
+        var p = ash[i];
+        p.y += p.v;
+        p.x += Math.sin(now * 0.0004 + p.ph) * 0.35 * dpr;
+        if (p.y > H + 4){ p.y = -4; p.x = rnd(0, W); }
+        ctx.globalAlpha = p.a;
+        ctx.fillStyle = '#B9BEC7';
+        ctx.fillRect(p.x, p.y, p.s, p.s);
+      }
+      requestAnimationFrame(loop);
+    })(0);
+    return;
+  }
+
+  /* ---------- stav 2: naskenováno, popel složí nápis a rozpustí se ---------- */
+  setTimeout(go, GO_AT + 400);   // záloha: přechod proběhne vždy
+
+  var particles = [], ptr = {x:0, y:0, on:false, burst:0};
+  var dissolving = false, t0 = 0, last = 0;
+
+  function sampleText(){
+    var off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    var o = off.getContext('2d');
+    var lines = W / dpr < 600 ? ['Na', 'rozloučenou'] : ['Na rozloučenou'];
+    var fs = 100;
+    function setFont(){ o.font = 'italic ' + fs + 'px Georgia, "Times New Roman", serif'; }
+    setFont();
+    var widest = 0;
+    lines.forEach(function(s){ widest = Math.max(widest, o.measureText(s).width); });
+    fs = Math.min(fs * (W * 0.84) / widest, H * 0.22);
+    setFont();
+    o.fillStyle = '#fff'; o.textAlign = 'center'; o.textBaseline = 'middle';
+    var lh = fs * 1.15, y0 = H * 0.47 - (lines.length - 1) * lh / 2;
+    lines.forEach(function(s, k){ o.fillText(s, W / 2, y0 + k * lh); });
+    var data = o.getImageData(0, 0, W, H).data;
+    var gap = Math.max(3, Math.round(fs / 26)), pts;
+    for (;;){
+      pts = [];
+      for (var y = 0; y < H; y += gap)
+        for (var x = 0; x < W; x += gap)
+          if (data[(y * W + x) * 4 + 3] > 128) pts.push([x + rnd(-.6, .6), y + rnd(-.6, .6)]);
+      if (pts.length <= 4500) break;
+      gap++;
+    }
+    return pts;
+  }
+
+  function newParticle(){
+    return {x: rnd(0, W), y: rnd(-H * .4, H * 1.05), vx: 0, vy: 0, tx: 0, ty: 0, k: rnd(.6, 1.4),
+            s: rnd(.8, 2) * dpr, a: rnd(.55, 1), c: 'hsl(215,12%,' + Math.round(rnd(58, 84)) + '%)',
+            life: 1, decay: rnd(.45, .9), rise: rnd(.02, .09)};
+  }
+
+  function build(){
+    size();
+    var pts = sampleText();
+    while (particles.length < pts.length) particles.push(newParticle());
+    particles.length = pts.length;
+    pts.forEach(function(p, i){ particles[i].tx = p[0]; particles[i].ty = p[1]; });
+  }
+
+  function frame(now){
+    if (!t0){ t0 = now; last = now; }
+    var t = now - t0;
+    var s = Math.min(2.5, (now - last) / 16.7), dt = (now - last) / 1000;
+    last = now;
+    if (!dissolving && t > DISSOLVE_AT){ dissolving = true; foot.classList.remove('on'); foot.classList.add('off'); }
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = 'rgba(21,23,27,' + (dissolving ? .12 : .32) + ')';
+    ctx.fillRect(0, 0, W, H);
+
+    var fadeIn = Math.min(1, t / 1200);
+    var R = Math.max(70, Math.min(150, Math.min(W, H) * .14 / dpr)) * dpr;
+    var damp = Math.pow(.9, s);
+    var burst = ptr.burst > 0 ? 3 : 1;
+    if (ptr.burst > 0) ptr.burst -= s;
+
+    for (var i = 0; i < particles.length; i++){
+      var p = particles[i];
+      if (!dissolving){
+        p.vx += (p.tx - p.x) * .012 * p.k * s;
+        p.vy += (p.ty - p.y) * .012 * p.k * s;
+        if (ptr.on){
+          var dx = p.x - ptr.x, dy = p.y - ptr.y, d2 = dx * dx + dy * dy;
+          if (d2 < R * R && d2 > 1){
+            var d = Math.sqrt(d2), f = (1 - d / R) * 3.2 * burst * s;
+            p.vx += dx / d * f; p.vy += dy / d * f;
+          }
+        }
+        p.vx *= damp; p.vy *= damp;
+      } else {
+        p.vx += (.03 + rnd(-.04, .04)) * s;
+        p.vy -= p.rise * s;
+        p.vx *= Math.pow(.985, s); p.vy *= Math.pow(.985, s);
+        p.life -= dt * p.decay;
+      }
+      p.x += p.vx * s; p.y += p.vy * s;
+      var al = p.a * fadeIn * (dissolving ? Math.max(0, p.life) : 1);
+      if (al <= .01) continue;
+      ctx.globalAlpha = al;
+      ctx.fillStyle = p.c;
+      ctx.fillRect(p.x, p.y, p.s, p.s);
+    }
+    ctx.globalAlpha = 1;
+    if (t >= GO_AT){ go(); return; }
+    requestAnimationFrame(frame);
+  }
+
+  function setPtr(e, on){
+    var r = cv.getBoundingClientRect();
+    ptr.x = (e.clientX - r.left) * dpr; ptr.y = (e.clientY - r.top) * dpr; ptr.on = on;
+  }
+  cv.addEventListener('pointermove', function(e){ setPtr(e, true); });
+  cv.addEventListener('pointerdown', function(e){ setPtr(e, true); ptr.burst = 14; });
+  cv.addEventListener('pointerup', function(e){ if (e.pointerType !== 'mouse') ptr.on = false; });
+  cv.addEventListener('pointercancel', function(){ ptr.on = false; });
+  cv.addEventListener('pointerleave', function(){ ptr.on = false; });
+  var rt;
+  addEventListener('resize', function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){ if (!dissolving) build(); }, 150);
+  });
+
+  build();
+  foot.classList.add('on');
+  requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
