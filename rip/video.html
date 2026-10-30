@@ -15,9 +15,21 @@
   main{max-width:760px;margin:0 auto;padding:3.5rem 1.25rem 4rem}
   h1{font-weight:400;font-style:italic;font-size:clamp(2rem,7vw,3rem);margin:0 0 1.6rem;letter-spacing:.01em;text-align:center}
   .video{display:block;width:100%;max-height:75vh;aspect-ratio:16/9;background:#0E0F12}
-  .back{display:inline-flex;align-items:center;margin-top:1.2rem;color:var(--dim);text-decoration:none;transition:color .2s ease}
+  .page-actions{display:flex;justify-content:space-between;align-items:flex-start;margin-top:1.2rem}
+  .back{display:inline-flex;align-items:center;color:var(--dim);text-decoration:none;transition:color .2s ease}
   .back:hover{color:var(--ink)}
   .back:focus-visible{outline:2px solid var(--dim);outline-offset:4px}
+  .share{position:relative;color:var(--dim)}
+  .share summary{display:flex;align-items:center;gap:.35rem;list-style:none;cursor:pointer;opacity:.5;transition:opacity .2s ease,color .2s ease}
+  .share summary::-webkit-details-marker{display:none}
+  .share summary:hover,.share summary:focus-visible,.share[open] summary{opacity:1;color:var(--ink)}
+  .share summary:focus-visible{outline:2px solid var(--dim);outline-offset:4px}
+  .share summary svg{width:1rem;height:1rem;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .share-menu{position:absolute;z-index:2;right:0;top:calc(100% + .5rem);min-width:10rem;padding:.35rem;background:#1c1f24;border:1px solid #2B2F37;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .share-menu a,.share-menu button{display:block;width:100%;padding:.4rem .55rem;border:0;background:none;color:var(--dim);font:inherit;font-size:.95rem;text-align:left;text-decoration:none;white-space:nowrap;cursor:pointer}
+  .share-menu a:hover,.share-menu button:hover,.share-menu a:focus-visible,.share-menu button:focus-visible{color:var(--ink);background:#252930}
+  .share-menu a[aria-disabled="true"],.share-menu button:disabled{opacity:.45;cursor:not-allowed}
+  .share-status{margin:.5rem 0 0;color:var(--dim);font-size:.9rem;text-align:right}
 </style>
 </head>
 <body>
@@ -27,7 +39,66 @@
     <source src="../lib/lv1qDLbRhp8QfCrD.mp4" type="video/mp4">
     Váš prohlížeč nepodporuje přehrávání videa.
   </video>
-  <a class="back" href="index.html" aria-label="Zpět na předchozí stránku">← zpět</a>
+  <div class="page-actions">
+    <a class="back" href="index.html" aria-label="Zpět na předchozí stránku">← zpět</a>
+    <details class="share">
+      <summary aria-label="Sdílet video" aria-controls="share-menu" title="Sdílet video">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="m8.7 10.7 6.6-4.4M8.7 13.3l6.6 4.4"></path></svg>
+        <span>sdílet</span>
+      </summary>
+      <div class="share-menu" id="share-menu">
+        <a data-share="facebook" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a data-share="whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        <a data-share="telegram" target="_blank" rel="noopener noreferrer">Telegram</a>
+        <a data-share="x" target="_blank" rel="noopener noreferrer">X</a>
+        <button type="button" id="copy-link">Kopírovat odkaz</button>
+      </div>
+    </details>
+  </div>
+  <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
 </main>
+<script>
+(function(){
+  var pageUrl = new URL(window.location.href);
+  pageUrl.hash = '';
+  var encodedUrl = encodeURIComponent(pageUrl.href);
+  var encodedTitle = encodeURIComponent(document.title);
+  var shareUrls = {
+    facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl,
+    whatsapp: 'https://api.whatsapp.com/send?text=' + encodedTitle + '%20' + encodedUrl,
+    telegram: 'https://t.me/share/url?url=' + encodedUrl + '&text=' + encodedTitle,
+    x: 'https://twitter.com/intent/tweet?url=' + encodedUrl + '&text=' + encodedTitle
+  };
+  document.querySelectorAll('[data-share]').forEach(function(link){
+    link.href = shareUrls[link.dataset.share];
+  });
+
+  var share = document.querySelector('.share');
+  var copyButton = document.getElementById('copy-link');
+  var status = document.getElementById('share-status');
+  if (pageUrl.protocol !== 'https:' && pageUrl.protocol !== 'http:'){
+    document.querySelectorAll('[data-share]').forEach(function(link){
+      link.removeAttribute('href');
+      link.setAttribute('aria-disabled', 'true');
+    });
+    copyButton.disabled = true;
+    status.textContent = 'Sdílení bude dostupné po zveřejnění stránky na webu.';
+    return;
+  }
+
+  copyButton.addEventListener('click', function(){
+    if (!navigator.clipboard || !navigator.clipboard.writeText){
+      status.textContent = 'Kopírování odkazu není v tomto prohlížeči dostupné.';
+      return;
+    }
+    navigator.clipboard.writeText(pageUrl.href).then(function(){
+      status.textContent = 'Odkaz zkopírován.';
+      share.open = false;
+    }).catch(function(){
+      status.textContent = 'Odkaz se nepodařilo zkopírovat.';
+    });
+  });
+})();
+</script>
 </body>
 </html>
