@@ -124,6 +124,10 @@
   .media-pop{position:fixed;width:min(26rem,calc(100vw - 2rem));max-height:calc(100vh - 2rem);padding:2.6rem 1rem 1rem;background:#101114;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 20px 60px rgba(0,0,0,.7);font-family:var(--serif);text-align:center;overflow:visible}
   .media-pop::backdrop{background:rgba(5,5,7,.8)}
   .media-pop .media img,.media-pop .media video{display:block;width:100%;max-height:60vh;object-fit:contain;background:#0E0F12}
+  .media-pop .media img{cursor:zoom-in}
+  .media-pop.image-expanded{inset:0;width:100vw;height:100dvh;max-height:100dvh;margin:0;padding:3.5rem 1rem 1rem;border:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+  .media-pop.image-expanded .media{display:flex;width:100%;height:100%;min-height:0;align-items:center;justify-content:center}
+  .media-pop.image-expanded .media img{width:auto;height:auto;max-width:100%;max-height:100%;background:transparent;cursor:zoom-out}
   .media-pop .media audio{width:100%}
   .media-pop .media .ph{padding:2.5rem 1rem;border:1px solid #2B2F37;color:var(--dim);font-style:italic}
   .media-pop .media .ph b{display:block;font-size:2rem;font-style:normal;color:var(--ink);margin-bottom:.4rem}
@@ -146,7 +150,7 @@
 </head>
 <body>
 <main>
-  <a class="quest-mouse easter-egg" id="quest-mouse" href="https://www.youtube.com/watch?v=fbH8c4a4zIY" target="_blank" rel="noopener noreferrer" aria-label="L. K.?" title="Tajný kaštanový východ — pro případ, že nasazení nestačí" hidden>L. K.?</a>
+  <a class="quest-mouse easter-egg" id="quest-mouse" href="https://youtu.be/fbH8c4a4zIY?si=m22ddaliIAnbrrS9&t=51" target="_blank" rel="noopener noreferrer" aria-label="L. K.?" title="Tajný kaštanový východ — pro případ, že nasazení nestačí" hidden>L. K.?</a>
   <dialog class="quest-pop" id="quest-pop" aria-label="Rozhovor s dobrodruhem">
     <div class="quest-layout">
       <div class="quest-art">
@@ -204,7 +208,7 @@
     <button type="button" id="egg-close">zavřít</button>
   </dialog>
   <dialog class="end-pop" id="end-pop" aria-labelledby="end-title">
-    <h2 id="end-title">Jsi při plném vědomí? Nechci, aby se ti udělalo špatně. Rozhodneš se pokračovat?</h2>
+    <h2 id="end-title">Jsi při plném vědomí?<br>Nechci, aby se ti udělalo špatně. Rozhodneš se pokračovat?</h2>
     <div class="actions">
       <a id="end-go" href="https://youtu.be/gEuE5kT2x9s?si=kauAF_Oxp7LMq7C9&amp;t=39" target="_blank" rel="noopener noreferrer">Ano</a>
       <button type="button" id="end-close">Ne</button>
@@ -212,7 +216,7 @@
   </dialog>
   <dialog class="quest-prompt" id="permission-pop" aria-labelledby="permission-title">
     <h2 id="permission-title">Mohu ti ještě nechat jednu zprávu?</h2>
-    <p>Je to jen poslední připomenutí. Oznámení můžeš odmítnout; zpráva se případně ukáže pouze tady.</p>
+    <p>Jsi totiž už jenom kousek od finále!</p>
     <p class="permission-note" id="permission-note" aria-live="polite"></p>
     <div class="prompt-actions">
       <button type="button" id="permission-allow">Povolit oznámení</button>
@@ -220,12 +224,12 @@
     </div>
   </dialog>
   <dialog class="scary-pop" id="scary-pop" aria-labelledby="scary-title">
-    <h2 id="scary-title">Opravdu se cítíš na to pokračovat dál?</h2>
-    <a id="scary-continue" href="../lib/lv1qD4LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer">Ano, od žaludku mi zle není</a>
+    <h2 id="scary-title">Neudělalo se ti těžko od žaludku?</h2>
+    <a id="scary-continue" href="../lib/lv1qD4LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer">Ne! Pusťme se do toho.</a>
   </dialog>
   <dialog class="big-end" id="big-end" aria-labelledby="big-end-title">
     <span class="big-label" id="big-end-title">JSI VE FINÁLE</span>
-    <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky. Každopádně, děkujeme, vyhráváš mixér! - <i>L. K.</i></p>
+    <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky.<br>Každopádně, děkujeme, vyhráváš mixér! - <i>L. K.</i></p>
     <div class="prompt-actions">
       <a href="../conv/demokraticka-diskuse.pdf" target="_blank" rel="noopener noreferrer">Otevřít celou diskusi</a>
       <button type="button" id="big-end-replay">Zahrát znovu</button>
@@ -497,7 +501,7 @@
   function openModal(dialog){
     if (!dialog.open){ lock(); dialog.showModal(); }
   }
-  function stopMedia(){ box.querySelectorAll('video,audio').forEach(function(m){ try{ m.pause(); }catch(e){} }); box.innerHTML = ''; }
+  function stopMedia(){ pop.classList.remove('image-expanded'); box.querySelectorAll('video,audio').forEach(function(m){ try{ m.pause(); }catch(e){} }); box.innerHTML = ''; }
 
   function render(i){
     var src = MEDIA[i] || '';
@@ -514,7 +518,18 @@
       el = document.createElement('audio');
       el.src = src; el.autoplay = true; el.controls = true;
     } else {
-      el = document.createElement('img'); el.src = src; el.alt = '';
+      el = document.createElement('img'); el.src = src; el.alt = 'Kliknutím zvětšíš náhled'; el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Zvětšit náhled obrázku');
+      function toggleImagePreview(){
+        var expanded = pop.classList.toggle('image-expanded');
+        el.setAttribute('aria-label', expanded ? 'Vrátit obrázek do popupu' : 'Zvětšit náhled obrázku');
+      }
+      el.addEventListener('click', toggleImagePreview);
+      el.addEventListener('keydown', function(event){
+        if (event.key === 'Enter' || event.key === ' '){
+          event.preventDefault();
+          toggleImagePreview();
+        }
+      });
     }
     box.appendChild(el);
     if (el.play) { var p = el.play(); if (p && p.catch) p.catch(function(){}); }
