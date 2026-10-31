@@ -18,9 +18,9 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Zprávy na rozloučenou">
-<meta property="og:video" content="https://gecka2026.github.io/lib/lv1qDLbRhp8QfCrD.mp4">
-<meta property="og:video:url" content="https://gecka2026.github.io/lib/lv1qDLbRhp8QfCrD.mp4">
-<meta property="og:video:secure_url" content="https://gecka2026.github.io/lib/lv1qDLbRhp8QfCrD.mp4">
+<meta property="og:video" content="https://gecka2026.github.io/lib/lv1qD3LbRhp8QfCrD.mp4">
+<meta property="og:video:url" content="https://gecka2026.github.io/lib/lv1qD3LbRhp8QfCrD.mp4">
+<meta property="og:video:secure_url" content="https://gecka2026.github.io/lib/lv1qD3LbRhp8QfCrD.mp4">
 <meta property="og:video:type" content="video/mp4">
 <meta property="og:video:width" content="848">
 <meta property="og:video:height" content="432">
@@ -31,6 +31,7 @@
 <meta name="twitter:image:alt" content="Zprávy na rozloučenou">
 <title>Když nasazení nestačí</title>
 <style>
+  @font-face{font-family:PublicPixel;src:url("../lib/PublicPixel.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
   :root{
     --bg:#15171B; --ink:#B9BEC7; --dim:#6E7480;
     --serif:Georgia,'Times New Roman',serif;
@@ -65,13 +66,119 @@
   .egg-pop a,.egg-pop button{display:inline-block;margin:0 .3rem;padding:.35rem .8rem;border:1px solid #2B2F37;background:none;color:var(--ink);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer}
   .egg-pop a:hover,.egg-pop button:hover{background:#252930}
   .share-status{margin:.5rem 0 0;color:var(--dim);font-size:.9rem;text-align:right}
+  body.locked{overflow:hidden;touch-action:none}
+  .end-pop{width:min(30rem,calc(100vw - 2rem));padding:2.5rem 1.8rem 1.8rem;background:#101114;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 20px 60px rgba(0,0,0,.85);font-family:var(--serif);text-align:center}
+  .end-pop::backdrop{background:rgba(5,5,7,.96);backdrop-filter:blur(5px)}
+  .end-pop h2{font-weight:400;font-style:italic;font-size:clamp(1.3rem,5vw,1.7rem);margin:0}
+  .end-pop .actions{position:relative;height:7rem;margin-top:1rem}
+  .end-pop a,.end-pop button{position:absolute;padding:.5rem 1.2rem;border:1px solid #2B2F37;background:#101114;color:var(--ink);font:inherit;font-size:1rem;text-decoration:none;cursor:pointer;transition:left .2s ease,top .2s ease,transform .2s ease,background .2s ease}
+  .end-pop a{top:.25rem;left:50%;transform:translateX(-50%);border-color:var(--dim)}
+  .end-pop button{bottom:0;left:50%;transform:translateX(-50%)}
+  .end-pop a:hover,.end-pop button:hover{background:#1c1f24}
+  .end-pop a:focus-visible,.end-pop button:focus-visible{outline:2px solid var(--dim);outline-offset:4px}
+  .end-pop a.dodged{transform:none}
+  .quest-pop,.quest-prompt,.scary-pop,.big-end{width:min(58rem,calc(100vw - 1.5rem));max-height:calc(100dvh - 1.5rem);overflow:auto;padding:1rem;background:#11130f;color:#e4e6d5;border:4px solid #6c7048;box-shadow:0 0 0 4px #171910,0 18px 60px rgba(0,0,0,.8);font-family:PublicPixel,monospace;image-rendering:pixelated}
+  .quest-pop::backdrop,.quest-prompt::backdrop,.scary-pop::backdrop,.big-end::backdrop{background:rgba(4,5,4,.9)}
+  .quest-layout{display:grid;grid-template-columns:minmax(10rem,36%) minmax(0,1fr);gap:1rem;align-items:stretch}
+  .quest-art{display:flex;align-items:center;justify-content:center;min-height:15rem;padding:.5rem;background:#20251a;border:3px solid #454a30}
+  .quest-art img,.quest-art svg{display:block;width:100%;max-height:18rem;object-fit:contain;image-rendering:pixelated}
+  .quest-art svg{display:none}
+  .quest-pop.complete #quest-gif{display:none}
+  .quest-pop.complete #quest-knight{display:block;animation:knight-rise .6s steps(4,end) both}
+  .quest-bubble{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:15rem;padding:1rem;background:#24281d;border:3px solid #8a8e62;box-shadow:inset 0 0 0 3px #171a13}
+  .quest-bubble::before{content:"";position:absolute;left:-.75rem;top:2.1rem;width:.8rem;height:1.2rem;background:#24281d;border-left:3px solid #8a8e62}
+  .quest-speaker{margin:0 0 .8rem;color:#c5c986;font-size:.62rem}
+  .quest-text{min-height:7rem;margin:0;font-size:clamp(.52rem,1vw,.68rem);line-height:2.15;overflow-wrap:anywhere}
+  .quest-text.typing::after{content:"";display:inline-block;height:.95em;margin-left:.25em;border-right:2px solid #e4e6d5;vertical-align:-.1em;animation:pixel-caret .7s steps(2,end) infinite}
+  .quest-next,.quest-prompt button,.scary-pop button,.scary-pop a,.big-end button,.big-end a{align-self:flex-end;margin-top:1rem;padding:.65rem .8rem;background:#353a27;color:#f0f1df;border:3px solid #a1a675;font:inherit;font-size:.58rem;line-height:1.9;text-decoration:none;cursor:pointer;box-shadow:3px 3px 0 #090a08}
+  .quest-next:hover,.quest-prompt button:hover,.scary-pop button:hover,.scary-pop a:hover,.big-end button:hover,.big-end a:hover{background:#4b5134}
+  .quest-next:focus-visible,.quest-prompt button:focus-visible,.scary-pop button:focus-visible,.scary-pop a:focus-visible,.big-end button:focus-visible,.big-end a:focus-visible{outline:3px solid #f0f1df;outline-offset:4px}
+  .quest-pop.complete .quest-art{background:#28301d}
+  .quest-pop.complete .quest-speaker{color:#f1d77d}
+  .quest-pop.complete .quest-text{color:#f1d77d}
+  .quest-mouse{position:fixed;z-index:5;width:max-content;height:auto;margin:0;padding:.3rem .5rem;border:0;background:transparent;color:var(--dim);font:inherit;font-size:.72rem;opacity:.12;text-decoration:none;cursor:pointer;transition:left .25s ease,top .25s ease,opacity .2s ease,transform .2s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .quest-mouse:hover,.quest-mouse:focus-visible{opacity:1;transform:scale(1.4)}
+  .quest-mouse:focus-visible{outline:2px solid var(--dim);outline-offset:3px}
+  .quest-mouse[hidden]{display:none}
+  .quest-prompt,.scary-pop,.big-end{width:min(34rem,calc(100vw - 1.5rem));padding:1.6rem;text-align:center}
+  .quest-prompt h2,.scary-pop h2,.big-end h2{margin:0;font-size:clamp(.72rem,2vw,.9rem);line-height:2.3;color:#f1d77d}
+  .quest-prompt p,.scary-pop p,.big-end p{font-size:.57rem;line-height:2.2}
+  .quest-prompt .prompt-actions,.big-end .prompt-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:.8rem}
+  .quest-prompt button,.scary-pop button,.scary-pop a,.big-end button,.big-end a{align-self:auto}
+  .permission-note{min-height:1.5em;color:#c5c986}
+  #permission-pop{border-color:#55464a;background:#141214;color:#bdb2b4;box-shadow:0 0 0 4px #211a1d,0 18px 60px rgba(0,0,0,.9)}
+  #permission-title{color:#c3aeb1}
+  #permission-pop button{background:#30272a;color:#cfc2c3;border-color:#67575a;box-shadow:3px 3px 0 #090809}
+  #permission-pop button:hover{background:#403337}
+  #permission-note{color:#a99a9d}
+  .scary-pop{border-color:#594044;background:#100e11;color:#b9afb2;box-shadow:0 0 0 4px #201619,0 0 45px rgba(91,40,49,.24),0 18px 60px rgba(0,0,0,.9)}
+  .scary-pop::backdrop{background:rgba(5,3,7,.96);backdrop-filter:blur(3px)}
+  .scary-pop h2{color:#d0b9bb}
+  .scary-pop p{color:#9e9296}
+  .big-end{border-color:#675c50;background:#100f10;color:#bdb5b0;box-shadow:0 0 0 5px #211d1a,0 0 70px rgba(79,57,51,.18),0 18px 60px rgba(0,0,0,.95)}
+  .big-end::backdrop{background:rgba(2,2,2,.97)}
+  .big-end .big-label{display:block;margin:0 0 1rem;color:#c3b4a1;font-size:clamp(1rem,4vw,1.6rem);letter-spacing:.08em;text-shadow:2px 2px #302623}
+  .big-end a{display:inline-block}
+  @keyframes pixel-caret{to{visibility:hidden}}
+  @keyframes knight-rise{from{transform:translateY(1rem);opacity:0}to{transform:translateY(0);opacity:1}}
+  .media-pop{position:fixed;width:min(26rem,calc(100vw - 2rem));max-height:calc(100vh - 2rem);padding:2.6rem 1rem 1rem;background:#101114;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 20px 60px rgba(0,0,0,.7);font-family:var(--serif);text-align:center;overflow:visible}
+  .media-pop::backdrop{background:rgba(5,5,7,.8)}
+  .media-pop .media img,.media-pop .media video{display:block;width:100%;max-height:60vh;object-fit:contain;background:#0E0F12}
+  .media-pop .media audio{width:100%}
+  .media-pop .media .ph{padding:2.5rem 1rem;border:1px solid #2B2F37;color:var(--dim);font-style:italic}
+  .media-pop .media .ph b{display:block;font-size:2rem;font-style:normal;color:var(--ink);margin-bottom:.4rem}
+  .media-x{position:absolute;top:.4rem;right:.4rem;width:2.4rem;height:2.4rem;padding:0;border:1px solid #2B2F37;background:#15171B;color:var(--ink);font-size:1.3rem;line-height:1;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:top .2s ease,right .2s ease,left .2s ease,bottom .2s ease}
+  .media-x.dodged{right:auto;left:.4rem}
+  @media(max-width:600px){
+    .quest-pop{padding:.65rem}
+    .quest-layout{grid-template-columns:minmax(0,1fr);gap:.65rem}
+    .quest-art{min-height:0;height:min(30vh,10rem)}
+    .quest-art img,.quest-art svg{height:100%;max-height:100%;width:auto;max-width:100%}
+    .quest-bubble{min-height:13rem;padding:.8rem}
+    .quest-bubble::before{left:50%;top:-.7rem;width:1.2rem;height:.7rem;border:0;border-top:3px solid #8a8e62;border-left:3px solid #8a8e62}
+    .quest-text{min-height:6.5rem;font-size:.55rem}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .quest-text.typing::after,.quest-pop.complete #quest-knight{animation:none}
+    .quest-mouse,.scary-pop{transition:none}
+  }
 </style>
 </head>
 <body>
 <main>
+  <a class="quest-mouse easter-egg" id="quest-mouse" href="https://www.youtube.com/watch?v=fbH8c4a4zIY" target="_blank" rel="noopener noreferrer" aria-label="L. K.?" title="Tajný kaštanový východ — pro případ, že nasazení nestačí" hidden>L. K.?</a>
+  <dialog class="quest-pop" id="quest-pop" aria-label="Rozhovor s dobrodruhem">
+    <div class="quest-layout">
+      <div class="quest-art">
+        <img id="quest-gif" src="../lib/IQ-quest.gif" alt="Dobrodruh čeká na zadání úkolu">
+        <svg id="quest-knight" viewBox="0 0 64 72" role="img" aria-label="Pixelový rytíř">
+          <path fill="#25261f" d="M13 65h38v4H13z"/>
+          <path fill="#6b2933" d="M16 28h8v23h-5v12h-7V46l4-7zm24 0h8l4 15v20h-8V46l-4-7z"/>
+          <path fill="#697a9b" d="M22 30h20l5 8-5 17H22l-5-17z"/>
+          <path fill="#aebbd0" d="M24 32h16v13H24z"/>
+          <path fill="#707d96" d="M18 37h6v15h-6zm22 0h6v15h-6z"/>
+          <path fill="#aebbd0" d="M23 51h8v4h-8zm10 0h8v4h-8z"/>
+          <path fill="#7e8ba2" d="M21 57h10v5H20zm12 0h10v5H33z"/>
+          <path fill="#c6a76c" d="M29 36h6v5h-6z"/>
+          <path fill="#7787a0" d="M23 21h18v10H23z"/>
+          <path fill="#aebbd0" d="M25 14h14v11H25z"/>
+          <path fill="#6d7890" d="M21 18h4v11h-4zm18 0h4v11h-4z"/>
+          <path fill="#aebbd0" d="M27 12h10v3H27z"/>
+          <path fill="#b95157" d="M31 4h5v8h-5zm-4 4h5v5h-5z"/>
+          <path fill="#d9e3ed" d="M43 32h3v25h-3zm-2 23h7v3h-7z"/>
+          <path fill="#d4b975" d="M41 29h5v5h-5z"/>
+        </svg>
+      </div>
+      <section class="quest-bubble" aria-live="polite">
+        <p class="quest-speaker" id="quest-speaker">DOBRODRUH</p>
+        <p class="quest-text typing" id="quest-text"></p>
+        <button class="quest-next" id="quest-next" type="button">Pokračovat</button>
+      </section>
+    </div>
+  </dialog>
   <h1></h1>
   <video class="video" controls playsinline preload="metadata" aria-label="Video vzpomínky">
-    <source src="../lib/lv1qDLbRhp8QfCrD.mp4" type="video/mp4">
+    <source src="../lib/lv1qD3LbRhp8QfCrD.mp4" type="video/mp4">
     Váš prohlížeč nepodporuje přehrávání videa.
   </video>
   <div class="page-actions">
@@ -91,15 +198,181 @@
     </details>
   </div>
   <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
-  <a class="easter-egg" href="https://gecka2026.github.io/lib/lv1qD3LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer" title="Tajný kaštanový východ — pro případ, že nasazení nestačí">L. K.?</a>
   <dialog class="egg-pop" id="egg-pop" aria-label="L. K.?">
     <p>L. K.?</p>
-    <a id="egg-go" href="https://gecka2026.github.io/lib/lv1qD3LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer">pustit</a>
+    <a id="egg-go" href="../lib/lv1qD3LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer">pustit</a>
     <button type="button" id="egg-close">zavřít</button>
+  </dialog>
+  <dialog class="end-pop" id="end-pop" aria-labelledby="end-title">
+    <h2 id="end-title">Jsi při plném vědomí? Nechci, aby se ti udělalo špatně. Rozhodneš se pokračovat?</h2>
+    <div class="actions">
+      <a id="end-go" href="https://youtu.be/gEuE5kT2x9s?si=kauAF_Oxp7LMq7C9&amp;t=39" target="_blank" rel="noopener noreferrer">Ano</a>
+      <button type="button" id="end-close">Ne</button>
+    </div>
+  </dialog>
+  <dialog class="quest-prompt" id="permission-pop" aria-labelledby="permission-title">
+    <h2 id="permission-title">Mohu ti ještě nechat jednu zprávu?</h2>
+    <p>Je to jen poslední připomenutí. Oznámení můžeš odmítnout; zpráva se případně ukáže pouze tady.</p>
+    <p class="permission-note" id="permission-note" aria-live="polite"></p>
+    <div class="prompt-actions">
+      <button type="button" id="permission-allow">Povolit oznámení</button>
+      <button type="button" id="permission-skip">Pokračovat bez nich</button>
+    </div>
+  </dialog>
+  <dialog class="scary-pop" id="scary-pop" aria-labelledby="scary-title">
+    <h2 id="scary-title">Opravdu se cítíš na to pokračovat dál?</h2>
+    <a id="scary-continue" href="../lib/lv1qD4LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer">Ano, od žaludku mi zle není</a>
+  </dialog>
+  <dialog class="big-end" id="big-end" aria-labelledby="big-end-title">
+    <span class="big-label" id="big-end-title">JSI VE FINÁLE</span>
+    <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky. Každopádně, děkujeme, vyhráváš mixér! - <i>L. K.</i></p>
+    <div class="prompt-actions">
+      <a href="../conv/demokraticka-diskuse.pdf" target="_blank" rel="noopener noreferrer">Otevřít celou diskusi</a>
+      <button type="button" id="big-end-replay">Zahrát znovu</button>
+    </div>
+  </dialog>
+  <dialog class="media-pop" id="media-pop" aria-label="L. K.?">
+    <button type="button" class="media-x" id="media-x" aria-label="Zavřít">✕</button>
+    <div class="media" id="media-box"></div>
   </dialog>
 </main>
 <script>
 (function(){
+    var pop = document.getElementById('quest-pop');
+    var text = document.getElementById('quest-text');
+    var speaker = document.getElementById('quest-speaker');
+    var next = document.getElementById('quest-next');
+    var mouse = document.getElementById('quest-mouse');
+    var egg = mouse;
+    var video = document.querySelector('.video');
+    var questText = 'ještě než opustíš stránku, řeknu ti, že je na stránce skrytá jedna "myška věc". Musíš být zdatný jí najít. Přeji ti štěstí dobrodruhu..';
+    var letters = Array.from(questText);
+    var position = 0;
+    var typingTimer = 0;
+    var accepted = false;
+    var completed = false;
+
+    function unlockIfFree(){
+      if (!Array.prototype.some.call(document.querySelectorAll('dialog'), function(dialog){ return dialog.open; })){
+        document.body.classList.remove('locked');
+      }
+    }
+
+    function finishTyping(){
+      window.clearInterval(typingTimer);
+      typingTimer = 0;
+      position = letters.length;
+      text.textContent = questText;
+      text.classList.remove('typing');
+      text.setAttribute('aria-live', 'polite');
+      next.textContent = 'Najít myšku';
+    }
+
+    function startTyping(){
+      text.textContent = '';
+      text.classList.add('typing');
+      text.setAttribute('aria-live', 'off');
+      next.textContent = 'Pokračovat';
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        finishTyping();
+        return;
+      }
+      typingTimer = window.setInterval(function(){
+        text.textContent += letters[position++];
+        if (position >= letters.length) finishTyping();
+      }, 28);
+    }
+
+    function placeMouse(){
+      var padding = 28;
+      var maxLeft = Math.max(padding, window.innerWidth - padding);
+      var maxTop = Math.max(80, window.innerHeight - padding);
+      mouse.style.left = (padding + Math.random() * Math.max(0, maxLeft - padding)) + 'px';
+      mouse.style.top = (80 + Math.random() * Math.max(0, maxTop - 80)) + 'px';
+    }
+
+    function playLevelUp(){
+      var AudioContextType = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextType) return;
+      var audio = new AudioContextType();
+      function playNotes(){
+        var notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
+        var start = audio.currentTime + .03;
+        notes.forEach(function(frequency, index){
+          var oscillator = audio.createOscillator();
+          var gain = audio.createGain();
+          var noteStart = start + index * .12;
+          oscillator.type = 'triangle';
+          oscillator.frequency.setValueAtTime(frequency, noteStart);
+          gain.gain.setValueAtTime(.0001, noteStart);
+          gain.gain.exponentialRampToValueAtTime(.12, noteStart + .015);
+          gain.gain.exponentialRampToValueAtTime(.0001, noteStart + .32);
+          oscillator.connect(gain);
+          gain.connect(audio.destination);
+          oscillator.start(noteStart);
+          oscillator.stop(noteStart + .33);
+        });
+      }
+      if (audio.state === 'suspended'){
+        audio.resume().then(playNotes).catch(function(){
+          speaker.textContent = 'ÚKOL SPLNĚN';
+        });
+      } else {
+        playNotes();
+      }
+    }
+
+    function completeQuest(){
+      if (!accepted || completed) return;
+      completed = true;
+      pop.classList.add('complete');
+      speaker.textContent = 'ÚKOL SPLNĚN';
+      text.textContent = 'Quest splněn. Můžeš pokračovat, dobrodruhu.';
+      text.classList.remove('typing');
+      text.setAttribute('aria-live', 'polite');
+      next.textContent = 'Pokračovat';
+      playLevelUp();
+      document.body.classList.add('locked');
+      pop.showModal();
+    }
+
+    next.addEventListener('click', function(){
+      if (completed){
+        pop.close();
+        unlockIfFree();
+        if (egg) egg.click();
+        return;
+      }
+      if (position < letters.length){
+        finishTyping();
+        return;
+      }
+      accepted = true;
+      pop.close();
+      unlockIfFree();
+      mouse.hidden = false;
+      placeMouse();
+    });
+    if (egg){
+      egg.addEventListener('click', function(event){
+        if (accepted && !completed){
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          completeQuest();
+        }
+      });
+    }
+    pop.addEventListener('cancel', function(event){ event.preventDefault(); });
+    pop.addEventListener('close', unlockIfFree);
+    document.body.classList.add('locked');
+    pop.showModal();
+    if (document.fonts && document.fonts.ready){
+      document.fonts.ready.then(startTyping);
+    } else {
+      startTyping();
+    }
+  })();
+  (function(){
   var videoUrl = 'https://gecka2026.github.io/rip/video.html';
   var encodedUrl = encodeURIComponent(videoUrl);
   var encodedTitle = encodeURIComponent(document.title);
@@ -137,17 +410,22 @@
   document.getElementById('egg-close').addEventListener('click', function(){ pop.close(); });
   document.getElementById('egg-go').addEventListener('click', function(){ pop.close(); });
   pop.addEventListener('click', function(e){ if (e.target === pop) pop.close(); });
-  // Napsání „lk“ na klávesnici.
+  // 1) po dohrání videa
+  // Závěrečná výzva po dohrání videa je samostatně níže.
+  // 2) napsání „lk“ na klávesnici
   var last = '';
   document.addEventListener('keydown', function(e){
+    var endPop = document.getElementById('end-pop');
+    if (endPop && endPop.open) return;
     var k = (e.key || '').toLowerCase();
     last = (last + k).slice(-2);
     if (last === 'lk') show();
   });
-  // Utíkající „L. K.?“ – uteče 2–3×, až pak doopravdy otevře video.
+  // 2b) utíkající „L. K.?“ – každé ťuknutí: uskočí + vyskočí náhodný obrázek/video/zvuk;
+  //     3. nebo 4. ťuknutí doopravdy otevře video
   var egg = document.querySelector('.easter-egg');
   if (egg){
-    var need = 3 + Math.floor(Math.random() * 2); // 3. nebo 4. klik otevře video
+    var need = 3 + Math.floor(Math.random() * 2);
     var clicks = 0;
     egg.addEventListener('click', function(e){
       clicks++;
@@ -168,9 +446,10 @@
         void egg.offsetWidth;
       }
       egg.style.left = x + 'px'; egg.style.top = y + 'px';
+      if (window.showMediaPop) window.showMediaPop();
     });
   }
-  // 3× rychlé ťuknutí na video (mobil).
+  // 3) 3× rychlé ťuknutí na video (mobil)
   var taps = [];
   if (video) video.addEventListener('pointerup', function(){
     var t = Date.now();
@@ -178,6 +457,238 @@
     taps.push(t);
     if (taps.length >= 3){ taps = []; show(); }
   });
+})();
+(function(){
+  // ===== SEZNAM 1–11: obrázky, videa nebo zvuky pro náhodný popup =====
+  var MEDIA = [
+
+    '../conv/1.PNG', // 1
+    '../conv/2.PNG', // 2
+    '../conv/3.PNG', // 3
+    '../conv/4.PNG', // 4
+    '../conv/5.PNG', // 5
+    '../conv/6.PNG', // 6
+    '../conv/7.PNG', // 7
+    '../conv/8.PNG', // 8
+    '../conv/9.PNG', // 9
+    '../conv/10.PNG', // 10
+    '../conv/11.PNG' // 11
+  ];
+  var pop = document.getElementById('media-pop');
+  var box = document.getElementById('media-box');
+  var x = document.getElementById('media-x');
+  var endPop = document.getElementById('end-pop');
+  var permissionPop = document.getElementById('permission-pop');
+  var scaryPop = document.getElementById('scary-pop');
+  var bigEnd = document.getElementById('big-end');
+  var video = document.querySelector('.video');
+  if (!pop || !pop.showModal) return;
+  var lastIdx = -1, dodged = false;
+  var endingStarted = false;
+  var notificationAllowed = false;
+  var scaryTimer = 0;
+
+  function lock(){ document.body.classList.add('locked'); }
+  function unlockIfFree(){
+    if (!Array.prototype.some.call(document.querySelectorAll('dialog'), function(dialog){ return dialog.open; })){
+      document.body.classList.remove('locked');
+    }
+  }
+  function openModal(dialog){
+    if (!dialog.open){ lock(); dialog.showModal(); }
+  }
+  function stopMedia(){ box.querySelectorAll('video,audio').forEach(function(m){ try{ m.pause(); }catch(e){} }); box.innerHTML = ''; }
+
+  function render(i){
+    var src = MEDIA[i] || '';
+    var ext = (src.split('?')[0].split('.').pop() || '').toLowerCase();
+    var el;
+    if (!src){
+      el = document.createElement('div'); el.className = 'ph';
+      el.innerHTML = '<b>' + (i + 1) + '</b>†';
+    } else if (ext === 'mp4' || ext === 'webm' || ext === 'mov'){
+      el = document.createElement('video');
+      el.src = src; el.autoplay = true; el.loop = true; el.playsInline = true; el.controls = true;
+      el.setAttribute('playsinline', '');
+    } else if (ext === 'mp3' || ext === 'wav' || ext === 'ogg' || ext === 'm4a'){
+      el = document.createElement('audio');
+      el.src = src; el.autoplay = true; el.controls = true;
+    } else {
+      el = document.createElement('img'); el.src = src; el.alt = '';
+    }
+    box.appendChild(el);
+    if (el.play) { var p = el.play(); if (p && p.catch) p.catch(function(){}); }
+  }
+
+  window.showMediaPop = function(){
+    if (pop.open) return;
+    var i;
+    do { i = Math.floor(Math.random() * MEDIA.length); } while (MEDIA.length > 1 && i === lastIdx);
+    lastIdx = i;
+    stopMedia(); render(i);
+    dodged = false; x.classList.remove('dodged');
+    lock(); pop.showModal();
+    x.blur();
+  };
+
+  // křížek jednou uhne, teprve podruhé okno zavře
+  x.addEventListener('click', function(e){
+    e.preventDefault();
+    if (!dodged){ dodged = true; x.classList.add('dodged'); return; }
+    stopMedia(); pop.close();
+  });
+  // nedá se zavřít klávesou Esc ani kliknutím vedle – jen křížkem
+  pop.addEventListener('cancel', function(e){ e.preventDefault(); });
+  pop.addEventListener('close', unlockIfFree);
+
+  function showBigEnd(){
+    if (endPop.open) endPop.close();
+    openModal(bigEnd);
+  }
+
+  function showEndChallenge(){
+    var endGo = document.getElementById('end-go');
+    endGo.classList.remove('dodged');
+    endGo.style.left = '';
+    endGo.style.top = '';
+    endYesDodged = false;
+    openModal(endPop);
+  }
+
+  function showScaryPop(){
+    if (endPop.open) endPop.close();
+    openModal(scaryPop);
+  }
+
+  function showScaryMessage(){
+    if (notificationAllowed && 'Notification' in window && Notification.permission === 'granted'){
+      try{
+        var notification = new Notification('Nepřečtená zpráva', {
+          body:'Poslední otázka čeká na stránce.',
+          icon:'../lib/icon-180.png',
+          tag:'rozlouceni-neprectena-zprava'
+        });
+        notification.onclick = function(){
+          window.focus();
+          notification.close();
+        };
+      } catch(error){
+        document.getElementById('share-status').textContent = 'Oznámení se nepodařilo zobrazit; poslední otázka se ukáže na stránce.';
+      }
+    }
+
+    scaryTimer = window.setTimeout(showScaryPop, 700);
+  }
+
+  function scheduleScaryMessage(){
+    permissionPop.close();
+    showScaryMessage();
+  }
+
+  function requestNotificationPermission(){
+    if (!window.isSecureContext || !('Notification' in window) || typeof Notification.requestPermission !== 'function'){
+      document.getElementById('permission-note').textContent = 'Oznámení tu nejsou dostupná; zpráva se ukáže na stránce.';
+      scheduleScaryMessage();
+      return;
+    }
+    if (Notification.permission === 'granted'){
+      notificationAllowed = true;
+      scheduleScaryMessage();
+      return;
+    }
+    if (Notification.permission === 'denied'){
+      document.getElementById('permission-note').textContent = 'Oznámení jsou v prohlížeči vypnutá; zpráva se ukáže na stránce.';
+      scheduleScaryMessage();
+      return;
+    }
+
+    try{
+      Promise.resolve(Notification.requestPermission()).then(function(permission){
+        notificationAllowed = permission === 'granted';
+        if (!notificationAllowed){
+          document.getElementById('permission-note').textContent = 'Bez obav — zpráva se ukáže jen na stránce.';
+        }
+        scheduleScaryMessage();
+      }).catch(function(){
+        document.getElementById('permission-note').textContent = 'Oznámení se nepodařilo povolit; zpráva se ukáže na stránce.';
+        scheduleScaryMessage();
+      });
+    } catch(error){
+      document.getElementById('permission-note').textContent = 'Oznámení se nepodařilo povolit; zpráva se ukáže na stránce.';
+      scheduleScaryMessage();
+    }
+  }
+
+  document.getElementById('permission-allow').addEventListener('click', requestNotificationPermission);
+  document.getElementById('permission-skip').addEventListener('click', function(){
+    notificationAllowed = false;
+    scheduleScaryMessage();
+  });
+  document.getElementById('scary-continue').addEventListener('click', function(){
+    scaryPop.close();
+    showEndChallenge();
+  });
+  document.getElementById('big-end-replay').addEventListener('click', function(){
+    bigEnd.close();
+    unlockIfFree();
+    window.clearTimeout(scaryTimer);
+    scaryTimer = 0;
+    endingStarted = false;
+    video.currentTime = 0;
+    var playback = video.play();
+    if (playback && playback.catch){
+      playback.catch(function(){
+        document.getElementById('share-status').textContent = 'Video se nepodařilo spustit. Přehraj ho ovládacími prvky videa.';
+        video.focus();
+      });
+    }
+  });
+  [permissionPop, scaryPop, bigEnd].forEach(function(dialog){
+    dialog.addEventListener('cancel', function(event){ event.preventDefault(); });
+    dialog.addEventListener('close', unlockIfFree);
+  });
+
+  // Závěrečná výzva po dohrání videa.
+  if (endPop && endPop.showModal){
+    function closeEnd(){ showBigEnd(); }
+    var endGo = document.getElementById('end-go');
+    var endYesDodged = false;
+    if (video) video.addEventListener('ended', function(){
+      if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){});
+      if (video.webkitDisplayingFullscreen && video.webkitExitFullscreen) try{ video.webkitExitFullscreen(); }catch(e){}
+      if (!endingStarted){
+        endingStarted = true;
+        openModal(permissionPop);
+      }
+    });
+    document.getElementById('end-close').addEventListener('click', closeEnd);
+    endGo.addEventListener('click', function(e){
+      if (!endYesDodged){
+        e.preventDefault();
+        endYesDodged = true;
+        var actions = endGo.parentElement;
+        var bounds = actions.getBoundingClientRect();
+        var button = endGo.getBoundingClientRect();
+        var no = document.getElementById('end-close').getBoundingClientRect();
+        var maxX = Math.max(0, bounds.width - button.width);
+        var maxY = Math.max(0, bounds.height - button.height);
+        var x, y, tries = 0;
+        do {
+          x = Math.random() * maxX;
+          y = Math.random() * maxY;
+          tries++;
+        } while (tries < 30 && x < no.right - bounds.left && x + button.width > no.left - bounds.left && y < no.bottom - bounds.top && y + button.height > no.top - bounds.top);
+        endGo.classList.add('dodged');
+        endGo.style.left = x + 'px';
+        endGo.style.top = y + 'px';
+        endGo.focus();
+        return;
+      }
+      setTimeout(closeEnd, 0);
+    });
+    endPop.addEventListener('cancel', function(e){ e.preventDefault(); });
+    endPop.addEventListener('close', unlockIfFree);
+  }
 })();
 </script>
 </body>
