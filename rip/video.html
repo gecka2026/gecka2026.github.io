@@ -518,7 +518,8 @@
   var bigEnd = document.getElementById('big-end');
   var video = document.querySelector('.video');
   if (!pop || !pop.showModal) return;
-  var lastIdx = -1, dodged = false;
+  var lastIdx = -1, mediaQueue = [], dodged = false;
+  var endYesDodges = 0;
   var endingStarted = false;
   var notificationAllowed = false;
   var scaryTimer = 0;
@@ -533,6 +534,23 @@
     if (!dialog.open){ lock(); dialog.showModal(); }
   }
   function stopMedia(){ pop.classList.remove('image-expanded'); box.querySelectorAll('video,audio').forEach(function(m){ try{ m.pause(); }catch(e){} }); box.innerHTML = ''; }
+  function nextMediaIndex(){
+    if (!mediaQueue.length){
+      mediaQueue = MEDIA.map(function(_, index){ return index; });
+      for (var i = mediaQueue.length - 1; i > 0; i--){
+        var j = Math.floor(Math.random() * (i + 1));
+        var value = mediaQueue[i];
+        mediaQueue[i] = mediaQueue[j];
+        mediaQueue[j] = value;
+      }
+      if (mediaQueue.length > 1 && mediaQueue[mediaQueue.length - 1] === lastIdx){
+        var first = mediaQueue[0];
+        mediaQueue[0] = mediaQueue[mediaQueue.length - 1];
+        mediaQueue[mediaQueue.length - 1] = first;
+      }
+    }
+    return mediaQueue.pop();
+  }
 
   function render(i){
     var src = MEDIA[i] || '';
@@ -568,8 +586,7 @@
 
   window.showMediaPop = function(){
     if (pop.open) return;
-    var i;
-    do { i = Math.floor(Math.random() * MEDIA.length); } while (MEDIA.length > 1 && i === lastIdx);
+    var i = nextMediaIndex();
     lastIdx = i;
     stopMedia(); render(i);
     dodged = false; x.classList.remove('dodged');
@@ -597,7 +614,7 @@
     endGo.classList.remove('dodged');
     endGo.style.left = '';
     endGo.style.top = '';
-    endYesDodged = false;
+    endYesDodges = 0;
     openModal(endPop);
   }
 
@@ -698,7 +715,6 @@
   if (endPop && endPop.showModal){
     function closeEnd(){ showBigEnd(); }
     var endGo = document.getElementById('end-go');
-    var endYesDodged = false;
     if (video) video.addEventListener('ended', function(){
       if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){});
       if (video.webkitDisplayingFullscreen && video.webkitExitFullscreen) try{ video.webkitExitFullscreen(); }catch(e){}
@@ -709,9 +725,9 @@
     });
     document.getElementById('end-close').addEventListener('click', closeEnd);
     endGo.addEventListener('click', function(e){
-      if (!endYesDodged){
+      if (endYesDodges < 2){
         e.preventDefault();
-        endYesDodged = true;
+        endYesDodges++;
         var actions = endGo.parentElement;
         var bounds = actions.getBoundingClientRect();
         var button = endGo.getBoundingClientRect();
