@@ -231,7 +231,7 @@
     <span class="big-label" id="big-end-title">JSI VE FINÁLE</span>
     <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky.<br>Každopádně, děkujeme!👏 Vyhráváš mixér! - <i>L. K.</i></p>
     <div class="prompt-actions">
-      <a href="../conv/demokraticka-diskuse.pdf" target="_blank" rel="noopener noreferrer">Otevřít celou diskusi</a>
+      <a href="../conv/demokraticka-diskuse.pdf" target="_blank" rel="noopener noreferrer">Navštívit občanské fórum</a>
       <button type="button" id="big-end-replay">Zahrát znovu</button>
     </div>
   </dialog>
@@ -255,6 +255,7 @@
     var typingTimer = 0;
     var accepted = false;
     var completed = false;
+    var introSoundPlayed = false;
 
     function unlockIfFree(){
       if (!Array.prototype.some.call(document.querySelectorAll('dialog'), function(dialog){ return dialog.open; })){
@@ -319,7 +320,7 @@
       }
       if (audio.state === 'suspended'){
         audio.resume().then(playNotes).catch(function(){
-          speaker.textContent = 'ÚKOL SPLNĚN';
+          document.getElementById('share-status').textContent = 'Zvuk se nepodařilo přehrát.';
         });
       } else {
         playNotes();
@@ -341,6 +342,10 @@
     }
 
     next.addEventListener('click', function(){
+      if (!introSoundPlayed){
+        introSoundPlayed = true;
+        playLevelUp();
+      }
       if (completed){
         pop.close();
         unlockIfFree();
@@ -426,14 +431,39 @@
     if (last === 'lk') show();
   });
   // 2b) utíkající „L. K.?“ – každé ťuknutí: uskočí + vyskočí náhodný obrázek/video/zvuk;
-  //     3. nebo 4. ťuknutí doopravdy otevře video
+  //     po 4–6 prokliknutých médiích lze pokračovat na video
   var egg = document.querySelector('.easter-egg');
   if (egg){
-    var need = 3 + Math.floor(Math.random() * 2);
-    var clicks = 0;
+    var mediaPop = document.getElementById('media-pop');
+    var completedMedia = 0;
+    var thresholdQueue = [];
+    function nextThreshold(){
+      if (!thresholdQueue.length){
+        thresholdQueue = [4, 5, 6];
+        for (var i = thresholdQueue.length - 1; i > 0; i--){
+          var j = Math.floor(Math.random() * (i + 1));
+          var value = thresholdQueue[i];
+          thresholdQueue[i] = thresholdQueue[j];
+          thresholdQueue[j] = value;
+        }
+      }
+      return thresholdQueue.pop();
+    }
+    var need = nextThreshold();
+    var mediaOpenedByEgg = false;
+    if (mediaPop) mediaPop.addEventListener('close', function(){
+      if (mediaOpenedByEgg){
+        mediaOpenedByEgg = false;
+        completedMedia++;
+      }
+    });
     egg.addEventListener('click', function(e){
-      clicks++;
-      if (clicks >= need) { clicks = 0; need = 3 + Math.floor(Math.random() * 2); return; }
+      if (completedMedia >= need){
+        completedMedia = 0;
+        need = nextThreshold();
+        return;
+      }
+      if (!window.showMediaPop || !mediaPop || mediaPop.open) return;
       e.preventDefault();
       var r = egg.getBoundingClientRect();
       var vw = window.innerWidth, vh = window.innerHeight, pad = 16;
@@ -450,7 +480,8 @@
         void egg.offsetWidth;
       }
       egg.style.left = x + 'px'; egg.style.top = y + 'px';
-      if (window.showMediaPop) window.showMediaPop();
+      window.showMediaPop();
+      mediaOpenedByEgg = mediaPop.open;
     });
   }
   // 3) 3× rychlé ťuknutí na video (mobil)
