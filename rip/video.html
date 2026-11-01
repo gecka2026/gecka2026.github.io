@@ -88,8 +88,16 @@
   .quest-bubble{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:15rem;padding:1rem;background:#24281d;border:3px solid #8a8e62;box-shadow:inset 0 0 0 3px #171a13}
   .quest-bubble::before{content:"";position:absolute;left:-.75rem;top:2.1rem;width:.8rem;height:1.2rem;background:#24281d;border-left:3px solid #8a8e62}
   .quest-speaker{margin:0 0 .8rem;color:#c5c986;font-size:.62rem}
+  .quest-lore{position:relative;margin:0 0 .8rem;padding:.65rem .75rem;background:#1a1e16;border-left:2px solid #8a8e62;font-size:clamp(.5rem,.9vw,.62rem);line-height:1.9;font-style:italic}
+  .quest-lore summary{display:grid;gap:.25rem;padding-right:1rem;color:inherit;cursor:pointer;list-style:none}
+  .quest-lore summary::-webkit-details-marker{display:none}
+  .quest-lore summary::after{content:"+";position:absolute;right:.65rem;top:.35rem;color:#c5c986;font-style:normal}
+  .quest-lore[open] summary::after{content:"−"}
+  .quest-lore-label{color:#c5c986;font-style:italic}
+  .quest-lore-preview{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+  .quest-lore p{margin:.5rem 0 0}
   .quest-text{min-height:7rem;margin:0;font-size:clamp(.52rem,1vw,.68rem);line-height:2.15;overflow-wrap:anywhere}
-  .quest-text.typing::after{content:"";display:inline-block;height:.95em;margin-left:.25em;border-right:2px solid #e4e6d5;vertical-align:-.1em;animation:pixel-caret .7s steps(2,end) infinite}
+  .quest-text.typing::after,.quest-lore-text.typing::after{content:"";display:inline-block;height:.95em;margin-left:.25em;border-right:2px solid #e4e6d5;vertical-align:-.1em;animation:pixel-caret .7s steps(2,end) infinite}
   .quest-next,.quest-prompt button,.scary-pop button,.scary-pop a,.big-end button,.big-end a{align-self:flex-end;margin-top:1rem;padding:.65rem .8rem;background:#353a27;color:#f0f1df;border:3px solid #a1a675;font:inherit;font-size:.58rem;line-height:1.9;text-decoration:none;cursor:pointer;box-shadow:3px 3px 0 #090a08}
   .quest-next:hover,.quest-prompt button:hover,.scary-pop button:hover,.scary-pop a:hover,.big-end button:hover,.big-end a:hover{background:#4b5134}
   .quest-next:focus-visible,.quest-prompt button:focus-visible,.scary-pop button:focus-visible,.scary-pop a:focus-visible,.big-end button:focus-visible,.big-end a:focus-visible{outline:3px solid #f0f1df;outline-offset:4px}
@@ -149,7 +157,7 @@
     .quest-text{min-height:6.5rem;font-size:.55rem}
   }
   @media(prefers-reduced-motion:reduce){
-    .quest-text.typing::after,.quest-pop.complete #quest-knight,.laugh-trigger{animation:none}
+    .quest-text.typing::after,.quest-lore-text.typing::after,.quest-pop.complete #quest-knight,.laugh-trigger{animation:none}
     .quest-mouse,.scary-pop{transition:none}
   }
 </style>
@@ -180,7 +188,14 @@
         </svg>
       </div>
       <section class="quest-bubble" aria-live="polite">
-        <p class="quest-speaker" id="quest-speaker">DOBRODRUH</p>
+        <p class="quest-speaker" id="quest-speaker">PAIDAGÓGOS 'παιδαγωγός'</p>
+        <details class="quest-lore">
+          <summary>
+            <span class="quest-lore-label">Lore</span>
+            <span class="quest-lore-preview"><strong>Pedagog:</strong> V antickém Řecku to byl doslova <strong>otrok, který dělal „poskoka“</strong>.</span>
+          </summary>
+          <p class="quest-lore-text" id="quest-lore-text" aria-live="off"></p>
+        </details>
         <p class="quest-text typing" id="quest-text"></p>
         <button class="quest-next" id="quest-next" type="button">Pokračovat</button>
       </section>
@@ -250,18 +265,27 @@
 (function(){
     var pop = document.getElementById('quest-pop');
     var text = document.getElementById('quest-text');
+    var lore = document.querySelector('.quest-lore');
+    var loreText = document.getElementById('quest-lore-text');
     var speaker = document.getElementById('quest-speaker');
     var next = document.getElementById('quest-next');
     var mouse = document.getElementById('quest-mouse');
     var egg = mouse;
     var video = document.querySelector('.video');
     var questText = 'ještě než opustíš stránku, řeknu ti, že je na stránce skrytá jedna "myška věc". Musíš být zdatný jí najít. Přeji ti štěstí dobrodruhu..';
+    var loreRemainder = 'Jeho úkolem nebylo učit, ale pouze nosit chlapci věci, doprovázet ho do školy, dohlížet na něj a chránit ho. Slovo vzniklo spojením řeckých výrazů pais (dítě) a agó (vést). Samotný učitel byl tehdy vážený občan, zatímco pedagog byl sluha.';
     var letters = Array.from(questText);
+    var loreLetters = Array.from(loreRemainder);
     var position = 0;
     var typingTimer = 0;
+    var lorePosition = 0;
+    var loreTypingTimer = 0;
     var accepted = false;
     var completed = false;
     var introSoundPlayed = false;
+    var questAudio = null;
+    var questEntryPlayed = false;
+    var questAudioCheckTimer = 0;
 
     function unlockIfFree(){
       if (!Array.prototype.some.call(document.querySelectorAll('dialog'), function(dialog){ return dialog.open; })){
@@ -293,6 +317,42 @@
         if (position >= letters.length) finishTyping();
       }, 28);
     }
+
+    function stopLoreTyping(reset){
+      window.clearInterval(loreTypingTimer);
+      loreTypingTimer = 0;
+      loreText.classList.remove('typing');
+      if (reset){
+        lorePosition = 0;
+        loreText.textContent = '';
+        loreText.setAttribute('aria-live', 'off');
+      }
+    }
+
+    function startLoreTyping(){
+      if (loreTypingTimer || lorePosition >= loreLetters.length) return;
+      loreText.classList.add('typing');
+      loreText.setAttribute('aria-live', 'off');
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+        loreText.textContent = loreRemainder;
+        lorePosition = loreLetters.length;
+        stopLoreTyping(false);
+        loreText.setAttribute('aria-live', 'polite');
+        return;
+      }
+      loreTypingTimer = window.setInterval(function(){
+        loreText.textContent += loreLetters[lorePosition++];
+        if (lorePosition >= loreLetters.length){
+          stopLoreTyping(false);
+          loreText.setAttribute('aria-live', 'polite');
+        }
+      }, 28);
+    }
+
+    lore.addEventListener('toggle', function(){
+      if (lore.open) startLoreTyping();
+      else stopLoreTyping(true);
+    });
 
     function placeMouse(){
       var padding = 28;
@@ -331,6 +391,87 @@
       } else {
         playNotes();
       }
+    }
+
+    function playQuestEntry(){
+      if (questEntryPlayed) return;
+      var AudioContextType = window.AudioContext || window.webkitAudioContext;
+      var status = document.getElementById('share-status');
+      if (!AudioContextType){
+        console.error('[quest-audio] Web Audio API není dostupné.');
+        status.textContent = 'Znělku nelze přehrát: Web Audio není dostupné.';
+        return;
+      }
+      if (!questAudio){
+        try {
+          questAudio = new AudioContextType();
+          questAudio.addEventListener('statechange', function(){
+            console.info('[quest-audio] Stav kontextu:', questAudio.state);
+            if (questAudio.state === 'running') playNotes();
+          });
+        } catch(error){
+          console.error('[quest-audio] Kontext se nepodařilo vytvořit:', error);
+          status.textContent = 'Znělku se nepodařilo připravit; podrobnosti jsou v konzoli.';
+          return;
+        }
+      }
+      function playNotes(){
+        if (questEntryPlayed || questAudio.state !== 'running') return;
+        questEntryPlayed = true;
+        window.clearTimeout(questAudioCheckTimer);
+        document.removeEventListener('pointerdown', retryQuestEntry);
+        document.removeEventListener('keydown', retryQuestEntry);
+        if (status.textContent.indexOf('Znělku') === 0
+          || status.textContent.indexOf('Automatické přehrání znělky') === 0
+          || status.textContent.indexOf('Prohlížeč blokuje automatické přehrání znělky') === 0){
+          status.textContent = '';
+        }
+        console.info('[quest-audio] Znělka se přehrává.');
+        var notes = [392, 523.25, 659.25, 783.99, 1046.5, 783.99, 1046.5, 1318.51];
+        var start = questAudio.currentTime + .03;
+        notes.forEach(function(frequency, index){
+          var oscillator = questAudio.createOscillator();
+          var gain = questAudio.createGain();
+          var noteStart = start + index * .13;
+          var duration = index === notes.length - 1 ? .34 : .16;
+          oscillator.type = 'square';
+          oscillator.frequency.setValueAtTime(frequency, noteStart);
+          gain.gain.setValueAtTime(.0001, noteStart);
+          gain.gain.exponentialRampToValueAtTime(.045, noteStart + .012);
+          gain.gain.exponentialRampToValueAtTime(.0001, noteStart + duration);
+          oscillator.connect(gain);
+          gain.connect(questAudio.destination);
+          oscillator.start(noteStart);
+          oscillator.stop(noteStart + duration + .01);
+        });
+      }
+      if (questAudio.state === 'running'){
+        playNotes();
+        return;
+      }
+      console.info('[quest-audio] Pokus o spuštění; stav kontextu:', questAudio.state);
+      questAudio.resume().then(playNotes).catch(function(error){
+        if (questEntryPlayed) return;
+        console.error('[quest-audio] Přehrávání zamítl prohlížeč:', error);
+        status.textContent = 'Automatické přehrání znělky bylo zablokováno; klikni pro její spuštění.';
+      });
+      if (!questEntryPlayed){
+        document.addEventListener('pointerdown', retryQuestEntry);
+        document.addEventListener('keydown', retryQuestEntry);
+        window.clearTimeout(questAudioCheckTimer);
+        questAudioCheckTimer = window.setTimeout(function(){
+          if (!questEntryPlayed && questAudio.state !== 'running'){
+            console.warn('[quest-audio] Autoplay blokován. Stav AudioContext:', questAudio.state);
+            status.textContent = 'Prohlížeč blokuje automatické přehrání znělky; klikni pro její spuštění.';
+          }
+        }, 1500);
+      }
+    }
+
+    function retryQuestEntry(){
+      document.removeEventListener('pointerdown', retryQuestEntry);
+      document.removeEventListener('keydown', retryQuestEntry);
+      playQuestEntry();
     }
 
     function completeQuest(){
@@ -378,9 +519,13 @@
       });
     }
     pop.addEventListener('cancel', function(event){ event.preventDefault(); });
-    pop.addEventListener('close', unlockIfFree);
+    pop.addEventListener('close', function(){
+      stopLoreTyping(false);
+      unlockIfFree();
+    });
     document.body.classList.add('locked');
     pop.showModal();
+    playQuestEntry();
     if (document.fonts && document.fonts.ready){
       document.fonts.ready.then(startTyping);
     } else {
