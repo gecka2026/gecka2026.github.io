@@ -61,7 +61,7 @@
 </style>
 </head>
 <body>
-<audio id="background-music" src="../lib/background-music.mp3" autoplay loop preload="auto" aria-hidden="true"></audio>
+<audio id="background-music" src="../lib/background-music.mp3" loop preload="none" aria-hidden="true"></audio>
 <button class="music-toggle" id="music-toggle" type="button" aria-label="Zapnout hudbu v pozadí" aria-pressed="false" title="Zapnout hudbu v pozadí">
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M4 10v4h4l5 4V6l-5 4H4z"></path>
@@ -126,7 +126,7 @@
       }).catch(function(){
         cancelAnimationFrame(fadeFrame);
         fadeFrame = 0;
-        console.warn('Hudbu se nepodařilo automaticky přehrát.', music.error);
+        console.warn('Hudbu se nepodařilo přehrát.', music.error);
       });
     } else if (!music.paused && !fadeFrame){
       fadeVolume();
@@ -148,7 +148,6 @@
     else music.pause();
   });
   updateToggle();
-  startMusic();
 })();
 </script>
 <script>
