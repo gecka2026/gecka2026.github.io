@@ -84,16 +84,15 @@
   .quest-art img,.quest-art svg{display:block;width:100%;max-height:18rem;object-fit:contain;image-rendering:pixelated}
   .quest-art svg{display:none}
   .quest-pop.complete #quest-gif{display:none}
-  .quest-pop.complete #quest-knight{display:block;animation:knight-rise .6s steps(4,end) both}
+  .quest-pop.complete #quest-knight,.quest-pop.complete #quest-complete-knight{display:block;animation:knight-rise .6s steps(4,end) both}
   .quest-bubble{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:15rem;padding:1rem;background:#24281d;border:3px solid #8a8e62;box-shadow:inset 0 0 0 3px #171a13}
-  .quest-bubble::before{content:"";position:absolute;left:-.75rem;top:2.1rem;width:.8rem;height:1.2rem;background:#24281d;border-left:3px solid #8a8e62}
+  .quest-bubble::before,.quest-bubble::after{content:"";position:absolute;width:0;height:0}
+  .quest-bubble::before{left:-.85rem;top:2rem;border-top:.7rem solid transparent;border-bottom:.7rem solid transparent;border-right:.9rem solid #8a8e62}
+  .quest-bubble::after{left:-.55rem;top:2.15rem;border-top:.55rem solid transparent;border-bottom:.55rem solid transparent;border-right:.7rem solid #24281d}
   .quest-speaker{margin:0 0 .8rem;color:#c5c986;font-size:.62rem}
-  .quest-lore{position:relative;margin:0 0 .8rem;padding:.65rem .75rem;background:#1a1e16;border-left:2px solid #8a8e62;font-size:clamp(.5rem,.9vw,.62rem);line-height:1.9;font-style:italic}
-  .quest-lore summary{display:grid;gap:.25rem;padding-right:1rem;color:inherit;cursor:pointer;list-style:none}
+  .quest-lore{margin:0 0 .8rem;font-size:clamp(.5rem,.9vw,.62rem);line-height:1.9;font-style:italic}
+  .quest-lore summary{display:grid;gap:.25rem;color:inherit;cursor:pointer;list-style:none}
   .quest-lore summary::-webkit-details-marker{display:none}
-  .quest-lore summary::after{content:"+";position:absolute;right:.65rem;top:.35rem;color:#c5c986;font-style:normal}
-  .quest-lore[open] summary::after{content:"−"}
-  .quest-lore-label{color:#c5c986;font-style:italic}
   .quest-lore-preview{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}
   .quest-lore p{margin:.5rem 0 0}
   .quest-text{min-height:7rem;margin:0;font-size:clamp(.52rem,1vw,.68rem);line-height:2.15;overflow-wrap:anywhere}
@@ -102,8 +101,7 @@
   .quest-next:hover,.quest-prompt button:hover,.scary-pop button:hover,.scary-pop a:hover,.big-end button:hover,.big-end a:hover{background:#4b5134}
   .quest-next:focus-visible,.quest-prompt button:focus-visible,.scary-pop button:focus-visible,.scary-pop a:focus-visible,.big-end button:focus-visible,.big-end a:focus-visible{outline:3px solid #f0f1df;outline-offset:4px}
   .quest-pop.complete .quest-art{background:#28301d}
-  .quest-pop.complete .quest-speaker{color:#f1d77d}
-  .quest-pop.complete .quest-text{color:#f1d77d}
+  .quest-pop.complete .quest-speaker,.quest-pop.complete .quest-text{color:#f1d77d}
   .quest-mouse{position:fixed;z-index:5;width:max-content;height:auto;margin:0;padding:.3rem .5rem;border:0;background:transparent;color:var(--dim);font:inherit;font-size:.72rem;opacity:.12;text-decoration:none;cursor:pointer;transition:left .25s ease,top .25s ease,opacity .2s ease,transform .2s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   .quest-mouse:hover,.quest-mouse:focus-visible{opacity:1;transform:scale(1.4)}
   .quest-mouse:focus-visible{outline:2px solid var(--dim);outline-offset:3px}
@@ -153,11 +151,12 @@
     .quest-art{min-height:0;height:min(30vh,10rem)}
     .quest-art img,.quest-art svg{height:100%;max-height:100%;width:auto;max-width:100%}
     .quest-bubble{min-height:13rem;padding:.8rem}
-    .quest-bubble::before{left:50%;top:-.7rem;width:1.2rem;height:.7rem;border:0;border-top:3px solid #8a8e62;border-left:3px solid #8a8e62}
+    .quest-bubble::before{left:calc(50% - .7rem);top:-.85rem;border-top:0;border-right:.7rem solid transparent;border-bottom:.9rem solid #8a8e62;border-left:.7rem solid transparent}
+    .quest-bubble::after{left:calc(50% - .55rem);top:-.55rem;border-top:0;border-right:.55rem solid transparent;border-bottom:.7rem solid #24281d;border-left:.55rem solid transparent}
     .quest-text{min-height:6.5rem;font-size:.55rem}
   }
   @media(prefers-reduced-motion:reduce){
-    .quest-text.typing::after,.quest-lore-text.typing::after,.quest-pop.complete #quest-knight,.laugh-trigger{animation:none}
+    .quest-text.typing::after,.quest-lore-text.typing::after,.quest-pop.complete #quest-knight,.quest-pop.complete #quest-complete-knight,.laugh-trigger{animation:none}
     .quest-mouse,.scary-pop{transition:none}
   }
 </style>
@@ -191,13 +190,22 @@
         <p class="quest-speaker" id="quest-speaker">PAIDAGÓGOS 'παιδαγωγός'</p>
         <details class="quest-lore">
           <summary>
-            <span class="quest-lore-label">Lore</span>
             <span class="quest-lore-preview"><strong>Pedagog:</strong> V antickém Řecku to byl doslova <strong>otrok, který dělal „poskoka“</strong>.</span>
           </summary>
           <p class="quest-lore-text" id="quest-lore-text" aria-live="off"></p>
         </details>
         <p class="quest-text typing" id="quest-text"></p>
-        <button class="quest-next" id="quest-next" type="button">Pokračovat</button>
+        <button class="quest-next" id="quest-next" type="button" autofocus>Pokračovat</button>
+      </section>
+    </div>
+  </dialog>
+  <dialog class="quest-pop complete" id="quest-complete-pop" aria-label="Úkol splněn">
+    <div class="quest-layout">
+      <div class="quest-art" id="quest-complete-art"></div>
+      <section class="quest-bubble" aria-live="polite">
+        <p class="quest-speaker">ÚKOL SPLNĚN</p>
+        <p class="quest-text" id="quest-complete-text">Úkol úspěšně splněn! Můžeš hledat dál, dobrodruhu.</p>
+        <button class="quest-next" id="quest-complete-next" type="button" autofocus>Pokračovat</button>
       </section>
     </div>
   </dialog>
@@ -264,6 +272,13 @@
 <script>
 (function(){
     var pop = document.getElementById('quest-pop');
+    var completePop = document.getElementById('quest-complete-pop');
+    var completeNext = document.getElementById('quest-complete-next');
+    var completeArt = document.getElementById('quest-complete-art');
+    var completeKnight = document.getElementById('quest-knight').cloneNode(true);
+    completeKnight.id = 'quest-complete-knight';
+    completeKnight.setAttribute('aria-label', 'Pixelový rytíř, úkol splněn');
+    completeArt.appendChild(completeKnight);
     var text = document.getElementById('quest-text');
     var lore = document.querySelector('.quest-lore');
     var loreText = document.getElementById('quest-lore-text');
@@ -273,7 +288,7 @@
     var egg = mouse;
     var video = document.querySelector('.video');
     var questText = 'ještě než opustíš stránku, řeknu ti, že je na stránce skrytá jedna "myška věc". Musíš být zdatný jí najít. Přeji ti štěstí dobrodruhu..';
-    var loreRemainder = 'Jeho úkolem nebylo učit, ale pouze nosit chlapci věci, doprovázet ho do školy, dohlížet na něj a chránit ho. Slovo vzniklo spojením řeckých výrazů pais (dítě) a agó (vést). Samotný učitel byl tehdy vážený občan, zatímco pedagog byl poskok.';
+    var loreRemainder = 'Jeho úkolem nebylo učit, ale pouze nosit chlapci věci, doprovázet ho do školy, dohlížet na něj a chránit ho. Slovo vzniklo spojením řeckých výrazů pais (dítě) a agó (vést). Samotný učitel byl tehdy vážený občan, zatímco pedagog byl sluha.';
     var letters = Array.from(questText);
     var loreLetters = Array.from(loreRemainder);
     var position = 0;
@@ -286,6 +301,39 @@
     var questAudio = null;
     var questEntryPlayed = false;
     var questAudioCheckTimer = 0;
+    var questAudioRetryListening = false;
+
+    function requestPlaybackAudioSession(){
+      if (!navigator.audioSession) return;
+      try {
+        navigator.audioSession.type = 'playback';
+        console.info('[quest-audio] Vyžádána relace přehrávání na pozadí.');
+      } catch(error){
+        console.warn('[quest-audio] Relaci přehrávání se nepodařilo nastavit:', error);
+      }
+    }
+
+    function createAudioContext(AudioContextType){
+      try {
+        return new AudioContextType({latencyHint:'interactive'});
+      } catch(error){
+        console.warn('[quest-audio] Režim nízké latence není podporován:', error);
+        return new AudioContextType();
+      }
+    }
+
+    function resumeQuestAudio(){
+      if (!questAudio || questAudio.state !== 'suspended') return;
+      questAudio.resume().catch(function(error){
+        console.warn('[quest-audio] Kontext se po návratu stránky nepodařilo obnovit:', error);
+      });
+    }
+
+    requestPlaybackAudioSession();
+    document.addEventListener('visibilitychange', function(){
+      if (!document.hidden) resumeQuestAudio();
+    });
+    window.addEventListener('focus', resumeQuestAudio);
 
     function unlockIfFree(){
       if (!Array.prototype.some.call(document.querySelectorAll('dialog'), function(dialog){ return dialog.open; })){
@@ -293,7 +341,7 @@
       }
     }
 
-    function finishTyping(){
+    function finishTyping(playEndSound){
       window.clearInterval(typingTimer);
       typingTimer = 0;
       position = letters.length;
@@ -301,6 +349,7 @@
       text.classList.remove('typing');
       text.setAttribute('aria-live', 'polite');
       next.textContent = 'Najít myšku';
+      if (playEndSound) playTypingEnd();
     }
 
     function startTyping(){
@@ -313,9 +362,81 @@
         return;
       }
       typingTimer = window.setInterval(function(){
-        text.textContent += letters[position++];
-        if (position >= letters.length) finishTyping();
+        text.textContent += letters[position];
+        playTypingTick(position++);
+        if (position >= letters.length) finishTyping(true);
       }, 28);
+    }
+
+    function playTypingTick(index){
+      if (!questAudio || questAudio.state !== 'running') return;
+      var oscillator = questAudio.createOscillator();
+      var gain = questAudio.createGain();
+      var start = questAudio.currentTime;
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime([660, 740, 880][index % 3], start);
+      gain.gain.setValueAtTime(.0001, start);
+      gain.gain.exponentialRampToValueAtTime(.012, start + .003);
+      gain.gain.exponentialRampToValueAtTime(.0001, start + .022);
+      oscillator.connect(gain);
+      gain.connect(questAudio.destination);
+      oscillator.start(start);
+      oscillator.stop(start + .025);
+    }
+
+    function playTypingEnd(){
+      if (!questAudio || questAudio.state !== 'running') return;
+      var notes = [784, 1046.5, 1318.51];
+      var start = questAudio.currentTime + .02;
+      notes.forEach(function(frequency, index){
+        var oscillator = questAudio.createOscillator();
+        var gain = questAudio.createGain();
+        var noteStart = start + index * .09;
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(frequency, noteStart);
+        gain.gain.setValueAtTime(.0001, noteStart);
+        gain.gain.exponentialRampToValueAtTime(.035, noteStart + .006);
+        gain.gain.exponentialRampToValueAtTime(.0001, noteStart + .085);
+        oscillator.connect(gain);
+        gain.connect(questAudio.destination);
+        oscillator.start(noteStart);
+        oscillator.stop(noteStart + .09);
+      });
+    }
+
+    function playMissionAccept(){
+      var AudioContextType = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextType) return;
+      if (!questAudio) questAudio = createAudioContext(AudioContextType);
+
+      function playNotes(){
+        var notes = [659.25, 783.99, 1046.5, 1318.51];
+        var start = questAudio.currentTime + .025;
+        notes.forEach(function(frequency, index){
+          var oscillator = questAudio.createOscillator();
+          var gain = questAudio.createGain();
+          var noteStart = start + index * .085;
+          var duration = index === notes.length - 1 ? .24 : .105;
+          oscillator.type = 'square';
+          oscillator.frequency.setValueAtTime(frequency, noteStart);
+          gain.gain.setValueAtTime(.0001, noteStart);
+          gain.gain.exponentialRampToValueAtTime(.055, noteStart + .008);
+          gain.gain.exponentialRampToValueAtTime(.0001, noteStart + duration);
+          oscillator.connect(gain);
+          gain.connect(questAudio.destination);
+          oscillator.start(noteStart);
+          oscillator.stop(noteStart + duration + .01);
+        });
+      }
+
+      if (questAudio.state === 'running'){
+        playNotes();
+      } else {
+        questAudio.resume().then(playNotes).catch(function(error){
+          console.error('[quest-audio] Znělku přijetí úkolu se nepodařilo přehrát:', error);
+          document.getElementById('share-status').textContent = 'Znělku přijetí úkolu se nepodařilo přehrát.';
+        });
+      }
     }
 
     function stopLoreTyping(reset){
@@ -341,10 +462,12 @@
         return;
       }
       loreTypingTimer = window.setInterval(function(){
-        loreText.textContent += loreLetters[lorePosition++];
+        loreText.textContent += loreLetters[lorePosition];
+        playTypingTick(lorePosition++);
         if (lorePosition >= loreLetters.length){
           stopLoreTyping(false);
           loreText.setAttribute('aria-live', 'polite');
+          playTypingEnd();
         }
       }, 28);
     }
@@ -365,7 +488,7 @@
     function playLevelUp(){
       var AudioContextType = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextType) return;
-      var audio = new AudioContextType();
+      var audio = createAudioContext(AudioContextType);
       function playNotes(){
         var notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
         var start = audio.currentTime + .03;
@@ -393,8 +516,8 @@
       }
     }
 
-    function playQuestEntry(){
-      if (questEntryPlayed) return;
+    function playQuestEntry(replay){
+      if (questEntryPlayed && !replay) return;
       var AudioContextType = window.AudioContext || window.webkitAudioContext;
       var status = document.getElementById('share-status');
       if (!AudioContextType){
@@ -404,7 +527,7 @@
       }
       if (!questAudio){
         try {
-          questAudio = new AudioContextType();
+          questAudio = createAudioContext(AudioContextType);
           questAudio.addEventListener('statechange', function(){
             console.info('[quest-audio] Stav kontextu:', questAudio.state);
             if (questAudio.state === 'running') playNotes();
@@ -416,14 +539,16 @@
         }
       }
       function playNotes(){
-        if (questEntryPlayed || questAudio.state !== 'running') return;
+        if ((!replay && questEntryPlayed) || questAudio.state !== 'running') return;
         questEntryPlayed = true;
         window.clearTimeout(questAudioCheckTimer);
-        document.removeEventListener('pointerdown', retryQuestEntry);
-        document.removeEventListener('keydown', retryQuestEntry);
+        document.removeEventListener('pointerdown', retryQuestEntry, true);
+        document.removeEventListener('keydown', retryQuestEntry, true);
+        questAudioRetryListening = false;
         if (status.textContent.indexOf('Znělku') === 0
           || status.textContent.indexOf('Automatické přehrání znělky') === 0
-          || status.textContent.indexOf('Prohlížeč blokuje automatické přehrání znělky') === 0){
+          || status.textContent.indexOf('Prohlížeč blokuje automatické přehrání znělky') === 0
+          || status.textContent.indexOf('Prohlížeč zablokoval automatické přehrání znělky') === 0){
           status.textContent = '';
         }
         console.info('[quest-audio] Znělka se přehrává.');
@@ -453,39 +578,36 @@
       questAudio.resume().then(playNotes).catch(function(error){
         if (questEntryPlayed) return;
         console.error('[quest-audio] Přehrávání zamítl prohlížeč:', error);
-        status.textContent = 'Automatické přehrání znělky bylo zablokováno; klikni pro její spuštění.';
+        status.textContent = 'Prohlížeč zablokoval automatické přehrání znělky.';
       });
       if (!questEntryPlayed){
-        document.addEventListener('pointerdown', retryQuestEntry);
-        document.addEventListener('keydown', retryQuestEntry);
+        if (!questAudioRetryListening){
+          document.addEventListener('pointerdown', retryQuestEntry, true);
+          document.addEventListener('keydown', retryQuestEntry, true);
+          questAudioRetryListening = true;
+        }
         window.clearTimeout(questAudioCheckTimer);
         questAudioCheckTimer = window.setTimeout(function(){
           if (!questEntryPlayed && questAudio.state !== 'running'){
             console.warn('[quest-audio] Autoplay blokován. Stav AudioContext:', questAudio.state);
-            status.textContent = 'Prohlížeč blokuje automatické přehrání znělky; klikni pro její spuštění.';
+            status.textContent = 'Prohlížeč zablokoval automatické přehrání znělky.';
           }
         }, 1500);
       }
     }
 
     function retryQuestEntry(){
-      document.removeEventListener('pointerdown', retryQuestEntry);
-      document.removeEventListener('keydown', retryQuestEntry);
       playQuestEntry();
     }
 
     function completeQuest(){
       if (!accepted || completed) return;
       completed = true;
-      pop.classList.add('complete');
-      speaker.textContent = 'ÚKOL SPLNĚN';
-      text.textContent = 'Úkol úspěšně splněn! Můžeš hledat dál, dobrodruhu.';
-      text.classList.remove('typing');
-      text.setAttribute('aria-live', 'polite');
-      next.textContent = 'Pokračovat';
-      playLevelUp();
+      pop.close();
       document.body.classList.add('locked');
-      pop.showModal();
+      completePop.showModal();
+      playLevelUp();
+      playQuestEntry(true);
     }
 
     next.addEventListener('click', function(){
@@ -509,6 +631,12 @@
       mouse.hidden = false;
       placeMouse();
     });
+    completeNext.addEventListener('click', function(){
+      playMissionAccept();
+      completePop.close();
+      unlockIfFree();
+      if (egg) egg.click();
+    });
     if (egg){
       egg.addEventListener('click', function(event){
         if (accepted && !completed){
@@ -519,10 +647,12 @@
       });
     }
     pop.addEventListener('cancel', function(event){ event.preventDefault(); });
+    completePop.addEventListener('cancel', function(event){ event.preventDefault(); });
     pop.addEventListener('close', function(){
       stopLoreTyping(false);
       unlockIfFree();
     });
+    completePop.addEventListener('close', unlockIfFree);
     document.body.classList.add('locked');
     pop.showModal();
     playQuestEntry();
@@ -586,6 +716,8 @@
   var egg = document.querySelector('.easter-egg');
   if (egg){
     var mediaPop = document.getElementById('media-pop');
+    var mediaCompletionJingle = new Audio('../lib/npc.mp3');
+    mediaCompletionJingle.preload = 'auto';
     var completedMedia = 0;
     var thresholdQueue = [];
     function nextThreshold(){
@@ -606,6 +738,15 @@
       if (mediaOpenedByEgg){
         mediaOpenedByEgg = false;
         completedMedia++;
+        mediaCompletionJingle.currentTime = 0;
+        var playback = mediaCompletionJingle.play();
+        if (playback && playback.catch){
+          playback.catch(function(error){
+            console.error('Znělku za dokončení média se nepodařilo přehrát.', error);
+            var status = document.getElementById('share-status');
+            if (status) status.textContent = 'Znělku za dokončení média se nepodařilo přehrát.';
+          });
+        }
       }
     });
     egg.addEventListener('click', function(e){
