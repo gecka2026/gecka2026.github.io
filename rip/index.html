@@ -99,7 +99,6 @@
   var volume = .11;
   var fadeDuration = 2;
   var fadeFrame = 0;
-  var waitingForInteraction = false;
 
   function updateToggle(){
     var playing = !music.paused;
@@ -123,28 +122,15 @@
     var playback = music.play();
     if (playback && playback.then){
       playback.then(function(){
-        waitingForInteraction = false;
-        document.removeEventListener('pointerdown', resumeOnInteraction);
-        document.removeEventListener('keydown', resumeOnInteraction);
         if (!fadeFrame) fadeVolume();
       }).catch(function(){
         cancelAnimationFrame(fadeFrame);
         fadeFrame = 0;
-        if (waitingForInteraction) return;
-        waitingForInteraction = true;
-        document.addEventListener('pointerdown', resumeOnInteraction, {once:true});
-        document.addEventListener('keydown', resumeOnInteraction, {once:true});
+        console.warn('Hudbu se nepodařilo automaticky přehrát.', music.error);
       });
     } else if (!music.paused && !fadeFrame){
       fadeVolume();
     }
-  }
-
-  function resumeOnInteraction(){
-    waitingForInteraction = false;
-    document.removeEventListener('pointerdown', resumeOnInteraction);
-    document.removeEventListener('keydown', resumeOnInteraction);
-    startMusic();
   }
 
   music.volume = 0;
