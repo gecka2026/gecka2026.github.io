@@ -187,6 +187,28 @@
     .quest-text.typing::after,.quest-lore-text.typing::after,.quest-pop.complete #quest-knight,.quest-pop.complete #quest-complete-knight,.laugh-trigger,.signature-trigger{animation:none}
     .quest-mouse,.scary-pop{transition:none}
   }
+  .angel-call{position:fixed;left:50%;bottom:1rem;z-index:5;display:flex;flex-direction:column;align-items:center;gap:.4rem;width:8.5rem;padding:.5rem;color:#f5e6a8;text-decoration:none;font-family:var(--serif);font-size:.85rem;text-align:center;transform:translate(-50%,140%);opacity:0;transition:transform 1.4s cubic-bezier(.2,.9,.25,1),opacity 1.4s ease;pointer-events:none}
+  .angel-call.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+  .angel-call img{width:6.5rem;height:6.5rem;object-fit:cover;border-radius:50%;border:2px solid #d9b84a;box-shadow:0 0 22px rgba(241,215,125,.55);animation:angelSway 3.2s ease-in-out infinite}
+  .angel-call.show img{animation:angelSway 3.2s ease-in-out infinite,angelGlow 2.4s ease-in-out infinite}
+  .angel-call:focus-visible{outline:2px solid #f1d77d;outline-offset:4px}
+  @keyframes angelSway{0%,100%{transform:rotate(-5deg) translateY(0)}25%{transform:rotate(3deg) translateY(-4px)}50%{transform:rotate(5deg) translateY(0)}75%{transform:rotate(-2deg) translateY(-3px)}}
+  @keyframes angelGlow{0%,100%{box-shadow:0 0 14px rgba(241,215,125,.35)}50%{box-shadow:0 0 34px rgba(241,215,125,.85)}}
+  /* mírná varianta v rozhodovacím popupu – jen připomínka, neruší volbu */
+  .angel-call.mild{left:auto;right:max(1rem,env(safe-area-inset-right));bottom:max(1rem,env(safe-area-inset-bottom));width:6.5rem;font-size:.72rem;color:#cfc29a;transform:translateY(140%);transition:transform 2.2s cubic-bezier(.2,.9,.25,1),opacity 2.2s ease}
+  .angel-call.mild.show{transform:none;opacity:.82}
+  .angel-call.mild:hover,.angel-call.mild:focus-visible{opacity:1}
+  .angel-call.mild img{width:4.2rem;height:4.2rem;border-width:1px;box-shadow:0 0 10px rgba(241,215,125,.25);animation:angelSwaySoft 5s ease-in-out infinite}
+  .angel-call.mild.show img{animation:angelSwaySoft 5s ease-in-out infinite}
+  @keyframes angelSwaySoft{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg) translateY(-2px)}}
+  /* připomínka andílka ve finále */
+  .angel-final{display:flex;align-items:center;justify-content:center;gap:.9rem;max-width:26rem;margin:0 auto;max-height:0;opacity:0;overflow:hidden;transform:translateY(16px);color:#e9dcae;text-decoration:none;font-family:var(--serif);font-size:.95rem;font-style:italic;line-height:1.5;text-align:left;transition:max-height 1.6s ease,opacity 1.6s ease,transform 1.6s ease,margin 1.6s ease}
+  .big-end .angel-final{display:flex;padding:0;border:0;background:none;box-shadow:none;font-size:.95rem;line-height:1.5}
+  .angel-final.show{max-height:9rem;opacity:1;transform:none;margin:1.4rem auto .4rem;overflow:visible}
+  .angel-final img{flex:none;width:4.6rem;height:4.6rem;object-fit:cover;border-radius:50%;border:2px solid #d9b84a;animation:angelSway 3.2s ease-in-out infinite,angelGlow 2.4s ease-in-out infinite}
+  .big-end .angel-final:hover,.big-end .angel-final:focus-visible{background:none;color:#f5e6a8}
+  .angel-final:focus-visible{outline:2px solid #f1d77d;outline-offset:4px}
+  @media(prefers-reduced-motion:reduce){.angel-call img,.angel-final img{animation:none!important}}
 </style>
 </head>
 <body>
@@ -293,6 +315,10 @@
   <dialog class="big-end" id="big-end" aria-labelledby="big-end-title">
     <span class="big-label" id="big-end-title">JSI VE FINÁLE</span>
     <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky. Zůstávají v prázdných pokojích, kde po nás zbyly jen nedopité šálky a věci, které jsme nestihli říct. Čas odnese hlasy, tváře i známá jména, ale ne to, co jsme si navzájem způsobili. Až se jednou rozpadnou střechy, zhasnou poslední okna a svět umlkne, někde v tom tichu pořád zůstane ozvěna těch slov. Ne jako varování. Jako poslední důkaz, že tu někdo byl — a že už se nevrátí.<br><br>No, no, no, kotě..💁‍♂️ Nebudeme to tu přece tolik hrotit..💅🤭🙂<br>Každopádně, děkujeme!👏 Vyhráváš mixér! - <button class="signature-trigger" id="signature-trigger" type="button" aria-label="Otevřít odkaz L. K.">L. K.</button> <button class="laugh-trigger" id="laugh-trigger" type="button" aria-label="Přehrát smích" title="Přehrát smích">🤭</button></p>
+    <a class="angel-final" id="angel-final" href="memories.html" aria-label="Náš andílek strážný — zanech vzpomínku" tabindex="-1">
+      <img src="../lib/andele.jpg" alt="Raněný anděl strážný">
+      <span>Než odejdeš… náš andílek strážný čeká na tvou vzpomínku.</span>
+    </a>
     <div class="prompt-actions">
       <a href="diskuse.html" id="forum-visit">Navštívit občanské fórum</a>
       <button type="button" id="big-end-replay">Zkustím to znovu</button>
@@ -307,6 +333,10 @@
         <button type="button" id="afrika-yes">✓ Pustit video <span>Když_nasazení_nestačí - Afrika.mp4</span></button>
         <a href="diskuse.html">✕ Pokračovat na Občanské fórum</a>
       </div>
+      <a class="angel-call mild" id="angel-call" href="memories.html" aria-label="Náš andílek strážný — zanech vzpomínku" tabindex="-1">
+        <img src="../lib/andele.jpg" alt="Raněný anděl strážný">
+        <span>Náš andílek strážný… zanech vzpomínku</span>
+      </a>
     </section>
     <section class="afrika-player" id="afrika-player" hidden aria-label="Video Afrika">
       <div class="afrika-player-head">
@@ -1162,6 +1192,33 @@
     endPop.addEventListener('cancel', function(e){ e.preventDefault(); });
     endPop.addEventListener('close', unlockIfFree);
   }
+})();
+</script>
+<script>
+(function(){
+  var pop=document.getElementById('afrika-pop'),angel=document.getElementById('angel-call'),confirmBox=document.getElementById('afrika-confirm');
+  var bigEnd=document.getElementById('big-end'),angelFinal=document.getElementById('angel-final');
+  var KEY='andilek-navstiven';
+  function visited(){try{return localStorage.getItem(KEY)==='1';}catch(e){return false;}}
+  function markVisited(){try{localStorage.setItem(KEY,'1');}catch(e){}}
+  [angel,angelFinal].forEach(function(a){if(a)a.addEventListener('click',markVisited);});
+
+  // 1) Finále: andílek se připomene chvíli po otevření popupu "JSI VE FINÁLE".
+  if(bigEnd&&angelFinal){var tf;
+    new MutationObserver(function(){clearTimeout(tf);
+      if(bigEnd.open){angelFinal.classList.remove('show');angelFinal.tabIndex=-1;tf=setTimeout(function(){if(bigEnd.open){angelFinal.classList.add('show');angelFinal.tabIndex=0;}},3000);}
+      else{angelFinal.classList.remove('show');angelFinal.tabIndex=-1;}
+    }).observe(bigEnd,{attributes:true,attributeFilter:['open']});}
+
+  // 2) Rozhodnutí: jen tichá připomínka, a to jen když na andílka zapomněli
+  //    (ještě ho neotevřeli) a chvíli váhají bez akce.
+  if(!pop||!angel)return;var t,IDLE=12000;
+  function hide(){clearTimeout(t);angel.classList.remove('show');angel.tabIndex=-1;}
+  function arm(){hide();if(visited())return;t=setTimeout(function(){if(pop.open&&!confirmBox.hidden&&!visited()){angel.classList.add('show');angel.tabIndex=0;}},IDLE);}
+  ['pointerdown','keydown'].forEach(function(ev){pop.addEventListener(ev,function(e){if(!angel.classList.contains('show')&&pop.open&&!confirmBox.hidden&&!angel.contains(e.target))arm();});});
+  new MutationObserver(function(){if(pop.open&&!confirmBox.hidden)arm();else hide();}).observe(pop,{attributes:true,attributeFilter:['open']});
+  new MutationObserver(function(){if(confirmBox.hidden)hide();else if(pop.open)arm();}).observe(confirmBox,{attributes:true,attributeFilter:['hidden']});
+  if(location.hash==='#rozhodnuti'&&pop.showModal){setTimeout(function(){var c=document.getElementById('afrika-player');if(c)c.hidden=true;confirmBox.hidden=false;if(!pop.open)pop.showModal();},400);}
 })();
 </script>
 </body>
