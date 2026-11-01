@@ -232,7 +232,7 @@
     <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky.<br>Každopádně, děkujeme!👏 Vyhráváš mixér! - <i>L. K.</i></p>
     <div class="prompt-actions">
       <a href="../conv/demokraticka-diskuse.pdf" target="_blank" rel="noopener noreferrer">Navštívit občanské fórum</a>
-      <button type="button" id="big-end-replay">Zahrát znovu</button>
+      <button type="button" id="big-end-replay">Zkustím to znovu</button>
     </div>
   </dialog>
   <dialog class="media-pop" id="media-pop" aria-label="L. K.?">
@@ -332,7 +332,7 @@
       completed = true;
       pop.classList.add('complete');
       speaker.textContent = 'ÚKOL SPLNĚN';
-      text.textContent = 'Quest splněn. Můžeš pokračovat, dobrodruhu.';
+      text.textContent = 'Úkol úspěšně splněn! Můžeš hledat dál, dobrodruhu.';
       text.classList.remove('typing');
       text.setAttribute('aria-live', 'polite');
       next.textContent = 'Pokračovat';
@@ -693,19 +693,7 @@
     showEndChallenge();
   });
   document.getElementById('big-end-replay').addEventListener('click', function(){
-    bigEnd.close();
-    unlockIfFree();
-    window.clearTimeout(scaryTimer);
-    scaryTimer = 0;
-    endingStarted = false;
-    video.currentTime = 0;
-    var playback = video.play();
-    if (playback && playback.catch){
-      playback.catch(function(){
-        document.getElementById('share-status').textContent = 'Video se nepodařilo spustit. Přehraj ho ovládacími prvky videa.';
-        video.focus();
-      });
-    }
+    window.location.reload();
   });
   [permissionPop, scaryPop, bigEnd].forEach(function(dialog){
     dialog.addEventListener('cancel', function(event){ event.preventDefault(); });
