@@ -56,12 +56,13 @@
   .music-toggle .sound-waves,.music-toggle .mute-mark{display:none}
   .music-toggle[aria-pressed="true"] .sound-waves{display:block}
   .music-toggle[aria-pressed="false"] .mute-mark{display:block}
+  #audio-status{position:fixed;right:calc(1rem + env(safe-area-inset-right));bottom:calc(4.1rem + env(safe-area-inset-bottom));z-index:10;max-width:min(24rem,calc(100vw - 2rem));padding:.5rem .75rem;border:1px solid rgba(110,116,128,.35);background:rgba(21,23,27,.92);color:var(--ink);font-size:.85rem;line-height:1.4}
 
   @media (prefers-reduced-motion:reduce){.stage img,.card::before,.card::after,.card .greet,.card .stone{transition:none!important}.card .greet{letter-spacing:.04em}.card .stone{transform:none}}
 </style>
 </head>
 <body>
-<audio id="background-music" src="../lib/background-music.mp3" loop preload="none" aria-hidden="true"></audio>
+<audio id="background-music" src="../lib/background-music.mp3" preload="auto" aria-hidden="true"></audio>
 <button class="music-toggle" id="music-toggle" type="button" aria-label="Zapnout hudbu v pozadí" aria-pressed="false" title="Zapnout hudbu v pozadí">
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path d="M4 10v4h4l5 4V6l-5 4H4z"></path>
@@ -69,6 +70,7 @@
     <path class="mute-mark" d="m16 9 5 6m0-6-5 6"></path>
   </svg>
 </button>
+<span id="audio-status" role="status" aria-live="polite" hidden></span>
 <main>
   <center><h1>Na rozloučenou</h1></center>
 
@@ -96,9 +98,11 @@
 (function(){
   var music = document.getElementById('background-music');
   var toggle = document.getElementById('music-toggle');
+  var status = document.getElementById('audio-status');
   var volume = .11;
   var fadeDuration = 2;
   var fadeFrame = 0;
+  var fadeStartedAt = 0;
 
   function updateToggle(){
     var playing = !music.paused;
@@ -109,45 +113,57 @@
   }
 
   function fadeVolume(){
-    if (music.paused){ fadeFrame = 0; return; }
-    var fadeIn = Math.min(1, music.currentTime / fadeDuration);
-    var fadeOut = Number.isFinite(music.duration)
-      ? Math.min(1, Math.max(0, (music.duration - music.currentTime) / fadeDuration))
-      : 1;
+    fadeFrame = 0;
+    if (music.paused) return;
+    var fadeIn = Math.min(1, (performance.now() - fadeStartedAt) / (fadeDuration * 1000));
+    var fadeOut = 1;
+    if (Number.isFinite(music.duration) && music.duration > 0){
+      fadeOut = Math.min(1, Math.max(0, (music.duration - music.currentTime) / fadeDuration));
+    }
     music.volume = volume * Math.min(fadeIn, fadeOut);
-    fadeFrame = requestAnimationFrame(fadeVolume);
+    if (fadeIn < 1 || fadeOut < 1) fadeFrame = requestAnimationFrame(fadeVolume);
+  }
+
+  function showPlaybackError(error){
+    console.warn('Hudbu se nepodařilo automaticky přehrát:', error);
+    status.textContent = 'Automatické přehrání bylo blokováno. Spusť hudbu tlačítkem přehrávání.';
+    status.hidden = false;
+    updateToggle();
   }
 
   function startMusic(){
-    var playback = music.play();
-    if (playback && playback.then){
-      playback.then(function(){
-        if (!fadeFrame) fadeVolume();
-      }).catch(function(){
-        cancelAnimationFrame(fadeFrame);
-        fadeFrame = 0;
-        console.warn('Hudbu se nepodařilo přehrát.', music.error);
-      });
-    } else if (!music.paused && !fadeFrame){
-      fadeVolume();
-    }
+    music.play().catch(showPlaybackError);
   }
 
   music.volume = 0;
   music.addEventListener('play', function(){
+    status.hidden = true;
+    fadeStartedAt = performance.now();
     updateToggle();
-    if (!fadeFrame) fadeVolume();
+    if (!fadeFrame) fadeFrame = requestAnimationFrame(fadeVolume);
   });
   music.addEventListener('pause', function(){
     cancelAnimationFrame(fadeFrame);
     fadeFrame = 0;
     updateToggle();
   });
+  music.addEventListener('timeupdate', function(){
+    if (!music.paused && Number.isFinite(music.duration) && music.duration - music.currentTime <= fadeDuration && !fadeFrame){
+      fadeFrame = requestAnimationFrame(fadeVolume);
+    }
+  });
+  music.addEventListener('ended', function(){
+    music.currentTime = 0;
+    music.volume = 0;
+    updateToggle();
+    startMusic();
+  });
   toggle.addEventListener('click', function(){
     if (music.paused) startMusic();
     else music.pause();
   });
   updateToggle();
+  startMusic();
 })();
 </script>
 <script>
