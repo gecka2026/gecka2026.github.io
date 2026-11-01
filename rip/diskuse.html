@@ -6,31 +6,42 @@
 <meta name="theme-color" content="#15171B">
 <title>Občanské fórum — Na rozloučenou</title>
 <style>
-  :root{color-scheme:dark;--bg:#15171B;--ink:#B9BEC7;--dim:#6E7480}
+  :root{color-scheme:dark;--bg:#121418;--bg2:#1B1E24;--ink:#C9CDD4;--dim:#7A808C;--gold:#C8A96A;--line:rgba(200,169,106,.22)}
   *{box-sizing:border-box}
   html,body{width:100%;height:100%;min-height:0;margin:0}
-  body{display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
-  header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.65rem 1rem;background:var(--bg)}
-  a{color:var(--dim);text-decoration:none}
-  a:hover,a:focus-visible{color:var(--ink)}
-  a:focus-visible{outline:2px solid var(--dim);outline-offset:4px}
-  audio{width:min(18rem,55vw);height:2.5rem}
-  #audio-status{margin:0;color:var(--dim);font-size:.8rem}
-  main{min-width:0;min-height:0}
-  iframe{display:block;width:100%;height:100%;border:0;background:#fff}
-  @media(max-width:480px){
-    header{gap:.5rem;padding:.5rem .65rem}
-    audio{width:min(13rem,58vw)}
+  body{display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;background:radial-gradient(120% 80% at 50% 0%,#1E2129 0%,var(--bg) 60%);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+  header{position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem;padding:.7rem 1.25rem;background:linear-gradient(180deg,var(--bg2),rgba(18,20,24,.92));border-bottom:1px solid var(--line);box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  header::after{content:"";position:absolute;left:50%;bottom:-1px;width:min(240px,40%);height:1px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+  header>a{justify-self:start}
+  .title{justify-self:center;margin:0;font-weight:normal;font-size:1rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+  .title small{display:block;margin-top:.15rem;font-size:.68rem;letter-spacing:.3em;color:var(--dim);text-align:center}
+  .player{justify-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:.25rem}
+  a{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .85rem;border:1px solid var(--line);border-radius:999px;color:var(--dim);text-decoration:none;font-size:.9rem;transition:color .25s,border-color .25s,background .25s}
+  a:hover,a:focus-visible{color:var(--ink);border-color:var(--gold);background:rgba(200,169,106,.08)}
+  a:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  audio{width:min(18rem,40vw);height:2.25rem;border-radius:999px;opacity:.8;filter:sepia(.25) saturate(.8);transition:opacity .25s}
+  audio:hover,audio:focus-within{opacity:1}
+  #audio-status{margin:0;color:var(--gold);font-size:.75rem;font-style:italic;max-width:18rem;text-align:right}
+  main{min-width:0;min-height:0;padding:1rem}
+  iframe{display:block;width:100%;height:100%;border:1px solid var(--line);border-radius:6px;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+  @media(max-width:720px){
+    header{grid-template-columns:auto 1fr;gap:.5rem;padding:.55rem .7rem}
+    .title{display:none}
+    audio{width:min(13rem,60vw)}
+    main{padding:.4rem}
   }
 </style>
 </head>
 <body>
 <header>
   <a href="video.html">← zpět</a>
+  <h1 class="title">Občanské fórum<small>Na rozloučenou</small></h1>
+  <div class="player">
   <audio id="background-music" controls preload="auto" aria-label="Hudba na pozadí">
     <source src="../lib/background2.mp3" type="audio/mpeg">
   </audio>
   <span id="audio-status" role="status" aria-live="polite" hidden></span>
+  </div>
 </header>
 <main>
   <iframe src="../conv/demokraticka-diskuse.pdf#toolbar=1&amp;navpanes=0&amp;scrollbar=1" title="Občanské fórum — dokument PDF"></iframe>
