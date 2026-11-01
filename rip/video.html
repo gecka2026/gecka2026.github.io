@@ -60,11 +60,16 @@
   .share-menu a:hover,.share-menu button:hover,.share-menu a:focus-visible,.share-menu button:focus-visible{color:var(--ink);background:#252930}
   .share-menu a[aria-disabled="true"],.share-menu button:disabled{opacity:.45;cursor:not-allowed}
   .easter-egg.runaway{position:fixed;z-index:5;margin:0;opacity:1;font-size:.85rem;padding:.3rem .5rem;transition:left .25s ease,top .25s ease;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-  .egg-pop{max-width:20rem;padding:1.2rem 1.4rem;background:#1c1f24;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 8px 24px rgba(0,0,0,.4);font-family:var(--serif);text-align:center}
-  .egg-pop::backdrop{background:rgba(0,0,0,.55)}
-  .egg-pop p{margin:0 0 1rem}
-  .egg-pop a,.egg-pop button{display:inline-block;margin:0 .3rem;padding:.35rem .8rem;border:1px solid #2B2F37;background:none;color:var(--ink);font:inherit;font-size:.95rem;text-decoration:none;cursor:pointer}
-  .egg-pop a:hover,.egg-pop button:hover{background:#252930}
+  .egg-pop{width:min(90vw,70rem);max-width:none;padding:3rem 0 0;background:transparent;color:var(--ink);border:0;box-shadow:none;font-family:var(--serif);text-align:center;overflow:visible}
+  .egg-pop::backdrop{background:rgba(0,0,0,.8)}
+  .egg-pop iframe{display:block;width:100%;height:min(70vh,39.375rem);border:0;background:#000}
+  .egg-pop iframe[hidden]{display:none}
+  .egg-confirm{max-width:28rem;margin:0 auto;padding:1.5rem;background:#1c1f24;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+  .egg-confirm p{margin:0 0 1rem;font-size:1.15rem}
+  .egg-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:.75rem}
+  .egg-actions button,.egg-close{padding:.35rem .8rem;border:1px solid #2B2F37;background:#15171B;color:var(--ink);font:inherit;font-size:.95rem;cursor:pointer}
+  .egg-actions button:hover,.egg-close:hover{background:#252930}
+  .egg-close{position:absolute;top:.4rem;right:0}
   .share-status{margin:.5rem 0 0;color:var(--dim);font-size:.9rem;text-align:right}
   body.locked{overflow:hidden;touch-action:none}
   .end-pop{width:min(30rem,calc(100vw - 2rem));padding:2.5rem 1.8rem 1.8rem;background:#101114;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 20px 60px rgba(0,0,0,.85);font-family:var(--serif);text-align:center}
@@ -130,7 +135,11 @@
   .laugh-trigger{display:inline-block;margin-left:.15em;padding:0;border:0;background:none;color:inherit;font:inherit;font-size:1.35em;line-height:1;vertical-align:-.12em;cursor:pointer;animation:laugh-wiggle 1.1s ease-in-out infinite}
   .laugh-trigger:hover,.laugh-trigger:focus-visible{animation-duration:.45s;filter:brightness(1.2)}
   .laugh-trigger:focus-visible{outline:2px solid #c3b4a1;outline-offset:3px}
+  .signature-trigger{-webkit-appearance:none;appearance:none;display:inline;margin:0;padding:0;border:0;background:transparent;color:#ffb36b;font:inherit;font-style:italic;cursor:pointer;text-shadow:0 0 4px #ff5a00,0 0 10px #d20c00,0 0 18px #ff2b00;animation:hell-glow 1.2s ease-in-out infinite alternate}
+  .signature-trigger:hover,.signature-trigger:focus-visible{color:#ffd29c;text-shadow:0 0 6px #ff7b00,0 0 14px #f20,0 0 24px #f20}
+  .signature-trigger:focus-visible{outline:2px solid #ffb36b;outline-offset:3px}
   @keyframes laugh-wiggle{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-12deg) scale(1.08)}50%{transform:rotate(8deg) scale(1.12)}75%{transform:rotate(-5deg) scale(1.06)}}
+  @keyframes hell-glow{from{filter:brightness(.9)}to{filter:brightness(1.35)}}
   @keyframes pixel-caret{to{visibility:hidden}}
   @keyframes knight-rise{from{transform:translateY(1rem);opacity:0}to{transform:translateY(0);opacity:1}}
   .media-pop{position:fixed;width:min(26rem,calc(100vw - 2rem));max-height:calc(100vh - 2rem);padding:2.6rem 1rem 1rem;background:#101114;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 20px 60px rgba(0,0,0,.7);font-family:var(--serif);text-align:center;overflow:visible}
@@ -156,7 +165,7 @@
     .quest-text{min-height:6.5rem;font-size:.55rem}
   }
   @media(prefers-reduced-motion:reduce){
-    .quest-text.typing::after,.quest-lore-text.typing::after,.quest-pop.complete #quest-knight,.quest-pop.complete #quest-complete-knight,.laugh-trigger{animation:none}
+    .quest-text.typing::after,.quest-lore-text.typing::after,.quest-pop.complete #quest-knight,.quest-pop.complete #quest-complete-knight,.laugh-trigger,.signature-trigger{animation:none}
     .quest-mouse,.scary-pop{transition:none}
   }
 </style>
@@ -232,9 +241,15 @@
   </div>
   <p class="share-status" id="share-status" role="status" aria-live="polite"></p>
   <dialog class="egg-pop" id="egg-pop" aria-label="L. K.?">
-    <p>L. K.?</p>
-    <a id="egg-go" href="../lib/lv1qD3LbRhp8QfCrD.mp4" target="_blank" rel="noopener noreferrer">pustit</a>
-    <button type="button" id="egg-close">zavřít</button>
+    <section class="egg-confirm" id="egg-confirm" aria-labelledby="egg-question">
+      <p id="egg-question">Přehrát L. K. ~ Luciferský Komplex?</p>
+      <div class="egg-actions">
+        <button type="button" id="egg-yes">ANO</button>
+        <button type="button" id="egg-no">BOJÍM SE ČERTŮ</button>
+      </div>
+    </section>
+    <button class="egg-close" type="button" id="egg-close" hidden>zavřít</button>
+    <iframe id="egg-frame" title="Video L. K." allow="autoplay; fullscreen" allowfullscreen hidden></iframe>
   </dialog>
   <dialog class="end-pop" id="end-pop" aria-labelledby="end-title">
     <h2 id="end-title">"No, dobrá. Stále se cítíš ve své kůži?".<br>☝️ Pokračuj podle vlastního uvážení 🥶</h2>
@@ -258,9 +273,9 @@
   </dialog>
   <dialog class="big-end" id="big-end" aria-labelledby="big-end-title">
     <span class="big-label" id="big-end-title">JSI VE FINÁLE</span>
-    <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky. Zůstávají v prázdných pokojích, kde po nás zbyly jen nedopité šálky a věci, které jsme nestihli říct. Čas odnese hlasy, tváře i známá jména, ale ne to, co jsme si navzájem způsobili. Až se jednou rozpadnou střechy, zhasnou poslední okna a svět umlkne, někde v tom tichu pořád zůstane ozvěna těch slov. Ne jako varování. Jako poslední důkaz, že tu někdo byl — a že už se nevrátí.<br><br>No, no, no, kotě..💁‍♂️ Nebudeme to tu přece tolik hrotit..💅🤭🙂<br>Každopádně, děkujeme!👏 Vyhráváš mixér! - <i>L. K.</i> <button class="laugh-trigger" id="laugh-trigger" type="button" aria-label="Přehrát smích" title="Přehrát smích">🤭</button></p>
+    <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky. Zůstávají v prázdných pokojích, kde po nás zbyly jen nedopité šálky a věci, které jsme nestihli říct. Čas odnese hlasy, tváře i známá jména, ale ne to, co jsme si navzájem způsobili. Až se jednou rozpadnou střechy, zhasnou poslední okna a svět umlkne, někde v tom tichu pořád zůstane ozvěna těch slov. Ne jako varování. Jako poslední důkaz, že tu někdo byl — a že už se nevrátí.<br><br>No, no, no, kotě..💁‍♂️ Nebudeme to tu přece tolik hrotit..💅🤭🙂<br>Každopádně, děkujeme!👏 Vyhráváš mixér! - <button class="signature-trigger" id="signature-trigger" type="button" aria-label="Otevřít odkaz L. K.">L. K.</button> <button class="laugh-trigger" id="laugh-trigger" type="button" aria-label="Přehrát smích" title="Přehrát smích">🤭</button></p>
     <div class="prompt-actions">
-      <a href="../conv/demokraticka-diskuse.pdf" target="_blank" rel="noopener noreferrer">Navštívit občanské fórum</a>
+      <a href="diskuse.html">Navštívit občanské fórum</a>
       <button type="button" id="big-end-replay">Zkustím to znovu</button>
     </div>
   </dialog>
@@ -694,11 +709,33 @@
 })();
 (function(){
   var pop = document.getElementById('egg-pop');
+  var frame = document.getElementById('egg-frame');
+  var confirm = document.getElementById('egg-confirm');
+  var closeButton = document.getElementById('egg-close');
   var video = document.querySelector('.video');
   if (!pop || !pop.showModal) return;
-  function show(){ if (!pop.open) pop.showModal(); }
+  function show(){
+    if (pop.open) return;
+    confirm.hidden = false;
+    frame.hidden = true;
+    closeButton.hidden = true;
+    pop.showModal();
+  }
+  document.getElementById('signature-trigger').addEventListener('click', show);
+  document.getElementById('egg-yes').addEventListener('click', function(){
+    confirm.hidden = true;
+    frame.hidden = false;
+    closeButton.hidden = false;
+    frame.src = '../lib/lv1qD5LbRhp8QfCrD.mp4';
+  });
+  document.getElementById('egg-no').addEventListener('click', function(){ pop.close(); });
   document.getElementById('egg-close').addEventListener('click', function(){ pop.close(); });
-  document.getElementById('egg-go').addEventListener('click', function(){ pop.close(); });
+  pop.addEventListener('close', function(){
+    frame.removeAttribute('src');
+    frame.hidden = true;
+    confirm.hidden = false;
+    closeButton.hidden = true;
+  });
   pop.addEventListener('click', function(e){ if (e.target === pop) pop.close(); });
   // 1) po dohrání videa
   // Závěrečná výzva po dohrání videa je samostatně níže.

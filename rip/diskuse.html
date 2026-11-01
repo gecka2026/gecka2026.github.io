@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#15171B">
+<title>Občanské fórum — Na rozloučenou</title>
+<style>
+  :root{color-scheme:dark;--bg:#15171B;--ink:#B9BEC7;--dim:#6E7480}
+  *{box-sizing:border-box}
+  html,body{width:100%;height:100%;min-height:0;margin:0}
+  body{display:grid;grid-template-rows:auto minmax(0,1fr);overflow:hidden;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif}
+  header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.65rem 1rem;background:var(--bg)}
+  a{color:var(--dim);text-decoration:none}
+  a:hover,a:focus-visible{color:var(--ink)}
+  a:focus-visible{outline:2px solid var(--dim);outline-offset:4px}
+  audio{width:min(18rem,55vw);height:2.5rem}
+  #audio-status{margin:0;color:var(--dim);font-size:.8rem}
+  main{min-width:0;min-height:0}
+  iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+  @media(max-width:480px){
+    header{gap:.5rem;padding:.5rem .65rem}
+    audio{width:min(13rem,58vw)}
+  }
+</style>
+</head>
+<body>
+<header>
+  <a href="video.html">← zpět</a>
+  <audio id="background-music" controls preload="auto" aria-label="Hudba na pozadí">
+    <source src="../lib/background2.mp3" type="audio/mpeg">
+  </audio>
+  <span id="audio-status" role="status" aria-live="polite" hidden></span>
+</header>
+<main>
+  <iframe src="../conv/demokraticka-diskuse.pdf#toolbar=1&amp;navpanes=0&amp;scrollbar=1" title="Občanské fórum — dokument PDF"></iframe>
+</main>
+<script>
+(function(){
+  var audio = document.getElementById('background-music');
+  var status = document.getElementById('audio-status');
+  var fadeStartedAt = 0;
+  var fadeFrame = 0;
+
+  function updateVolume(){
+    fadeFrame = 0;
+    if (audio.paused) return;
+    var fadeIn = Math.min(1, (performance.now() - fadeStartedAt) / 2000);
+    var fadeOut = 1;
+    if (Number.isFinite(audio.duration) && audio.duration > 0){
+      fadeOut = Math.min(1, Math.max(0, (audio.duration - audio.currentTime) / 2));
+    }
+    audio.volume = Math.min(fadeIn, fadeOut);
+    if (fadeIn < 1 || fadeOut < 1) fadeFrame = requestAnimationFrame(updateVolume);
+  }
+
+  function showPlaybackError(error){
+    console.warn('Hudbu se nepodařilo automaticky přehrát:', error);
+    status.textContent = 'Automatické přehrání bylo blokováno. Spusť hudbu tlačítkem přehrávání.';
+    status.hidden = false;
+  }
+
+  audio.addEventListener('play', function(){
+    status.hidden = true;
+    fadeStartedAt = performance.now();
+    if (!fadeFrame) fadeFrame = requestAnimationFrame(updateVolume);
+  });
+  audio.addEventListener('timeupdate', function(){
+    if (!audio.paused && Number.isFinite(audio.duration) && audio.duration - audio.currentTime <= 2 && !fadeFrame){
+      fadeFrame = requestAnimationFrame(updateVolume);
+    }
+  });
+  audio.addEventListener('ended', function(){
+    audio.currentTime = 0;
+    audio.volume = 0;
+    audio.play().catch(showPlaybackError);
+  });
+
+  audio.volume = 0;
+  audio.play().catch(showPlaybackError);
+})();
+</script>
+</body>
+</html>
