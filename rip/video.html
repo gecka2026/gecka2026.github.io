@@ -117,8 +117,14 @@
   .scary-pop p{color:#9e9296}
   .big-end{border-color:#675c50;background:#100f10;color:#bdb5b0;box-shadow:0 0 0 5px #211d1a,0 0 70px rgba(79,57,51,.18),0 18px 60px rgba(0,0,0,.95)}
   .big-end::backdrop{background:rgba(2,2,2,.97)}
-  .big-end .big-label{display:block;margin:0 0 1rem;color:#c3b4a1;font-size:clamp(1rem,4vw,1.6rem);letter-spacing:.08em;text-shadow:2px 2px #302623}
+  .big-end{width:min(48rem,calc(100vw - 1.5rem));padding:clamp(1.6rem,5vw,3rem)}
+  .big-end p{font-size:clamp(.65rem,1.5vw,.78rem);line-height:2.3}
+  .big-end .big-label{display:block;margin:0 0 1rem;color:#c3b4a1;font-size:clamp(1.2rem,5vw,2rem);letter-spacing:.08em;text-shadow:2px 2px #302623}
   .big-end a{display:inline-block}
+  .laugh-trigger{display:inline-block;margin-left:.15em;padding:0;border:0;background:none;color:inherit;font:inherit;font-size:1.35em;line-height:1;vertical-align:-.12em;cursor:pointer;animation:laugh-wiggle 1.1s ease-in-out infinite}
+  .laugh-trigger:hover,.laugh-trigger:focus-visible{animation-duration:.45s;filter:brightness(1.2)}
+  .laugh-trigger:focus-visible{outline:2px solid #c3b4a1;outline-offset:3px}
+  @keyframes laugh-wiggle{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-12deg) scale(1.08)}50%{transform:rotate(8deg) scale(1.12)}75%{transform:rotate(-5deg) scale(1.06)}}
   @keyframes pixel-caret{to{visibility:hidden}}
   @keyframes knight-rise{from{transform:translateY(1rem);opacity:0}to{transform:translateY(0);opacity:1}}
   .media-pop{position:fixed;width:min(26rem,calc(100vw - 2rem));max-height:calc(100vh - 2rem);padding:2.6rem 1rem 1rem;background:#101114;color:var(--ink);border:1px solid #2B2F37;box-shadow:0 20px 60px rgba(0,0,0,.7);font-family:var(--serif);text-align:center;overflow:visible}
@@ -143,7 +149,7 @@
     .quest-text{min-height:6.5rem;font-size:.55rem}
   }
   @media(prefers-reduced-motion:reduce){
-    .quest-text.typing::after,.quest-pop.complete #quest-knight{animation:none}
+    .quest-text.typing::after,.quest-pop.complete #quest-knight,.laugh-trigger{animation:none}
     .quest-mouse,.scary-pop{transition:none}
   }
 </style>
@@ -229,7 +235,7 @@
   </dialog>
   <dialog class="big-end" id="big-end" aria-labelledby="big-end-title">
     <span class="big-label" id="big-end-title">JSI VE FINÁLE</span>
-    <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky.<br><br>No, no, no..💁‍♂️ Nebudeme to tu přece zas tolik prožívat!💅🤭🙂<br>Každopádně, děkujeme!👏 Vyhráváš mixér! - <i>L. K.</i></p>
+    <p>Některá slova zůstávají, i když už je pozdě je vzít zpátky. Zůstávají v prázdných pokojích, kde po nás zbyly jen nedopité šálky a věci, které jsme nestihli říct. Čas odnese hlasy, tváře i známá jména, ale ne to, co jsme si navzájem způsobili. Až se jednou rozpadnou střechy, zhasnou poslední okna a svět umlkne, někde v tom tichu pořád zůstane ozvěna těch slov. Ne jako varování. Jako poslední důkaz, že tu někdo byl — a že už se nevrátí.<br><br>No, no, no, kotě..💁‍♂️ Nebudeme to tu přece zas tolik hrotit..!!💅🤭🙂<br>Každopádně, děkujeme!👏 Vyhráváš mixér! - <i>L. K.</i> <button class="laugh-trigger" id="laugh-trigger" type="button" aria-label="Přehrát smích" title="Přehrát smích">🤭</button></p>
     <div class="prompt-actions">
       <a href="../conv/demokraticka-diskuse.pdf" target="_blank" rel="noopener noreferrer">Navštívit občanské fórum</a>
       <button type="button" id="big-end-replay">Zkustím to znovu</button>
@@ -691,6 +697,15 @@
   document.getElementById('scary-continue').addEventListener('click', function(){
     scaryPop.close();
     showEndChallenge();
+  });
+  document.getElementById('laugh-trigger').addEventListener('click', function(){
+    var laugh = new Audio('../lib/league-of-legends-lulu-laugh-3.mp3');
+    var playback = laugh.play();
+    if (playback && playback.catch){
+      playback.catch(function(){
+        document.getElementById('share-status').textContent = 'Smích se nepodařilo přehrát.';
+      });
+    }
   });
   document.getElementById('big-end-replay').addEventListener('click', function(){
     window.location.reload();
