@@ -1242,5 +1242,9 @@
   if(location.hash==='#rozhodnuti'&&pop.showModal){setTimeout(function(){var c=document.getElementById('afrika-player');if(c)c.hidden=true;confirmBox.hidden=false;if(!pop.open)pop.showModal();},400);}
 })();
 </script>
+<script>
+(function(){var ctx;function click(){try{var A=window.AudioContext||window.webkitAudioContext;if(!A)return;ctx=ctx||new A();if(ctx.state==='suspended')ctx.resume();var t=ctx.currentTime,o=ctx.createOscillator(),o2=ctx.createOscillator(),g=ctx.createGain();o.type='triangle';o.frequency.setValueAtTime(1400,t);o.frequency.exponentialRampToValueAtTime(600,t+0.08);o2.type='sine';o2.frequency.setValueAtTime(2100,t);o2.frequency.exponentialRampToValueAtTime(900,t+0.06);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.25,t+0.005);g.gain.exponentialRampToValueAtTime(0.0001,t+0.12);o.connect(g);o2.connect(g);g.connect(ctx.destination);o.start(t);o2.start(t);o.stop(t+0.13);o2.stop(t+0.13);}catch(e){}}
+document.addEventListener('pointerdown',function(e){var b=e.target.closest&&e.target.closest('button,[role="button"],input[type="button"],input[type="submit"]');if(b&&!b.disabled)click();},true);})();
+</script>
 </body>
 </html>
